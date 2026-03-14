@@ -7,7 +7,7 @@ const User = require("../models/User");
 const getOrCreateConversation = async (req, res) => {
   try {
     const { friendId } = req.body;
-    const userId = req.user;
+    const userId = req.userId;
 
     if (userId === friendId) {
       return res.status(400).json({ message: "Cannot create conversation with yourself" });
@@ -47,7 +47,7 @@ const getOrCreateConversation = async (req, res) => {
 const createGroupChat = async (req, res) => {
   try {
     const { groupName, friendIds } = req.body;
-    const userId = req.user;
+    const userId = req.userId;
 
     if (!groupName || !friendIds || friendIds.length === 0) {
       return res.status(400).json({ message: "Group name and at least one friend required" });
@@ -84,7 +84,7 @@ const createGroupChat = async (req, res) => {
 // Get user's conversations
 const getUserConversations = async (req, res) => {
   try {
-    const userId = req.user;
+    const userId = req.userId;
 
     const conversations = await Conversation.find({
       participants: userId
@@ -104,7 +104,7 @@ const getUserConversations = async (req, res) => {
 const getMessages = async (req, res) => {
   try {
     const { conversationId } = req.params;
-    const userId = req.user;
+    const userId = req.userId;
 
     // Verify user is part of conversation
     const conversation = await Conversation.findById(conversationId);
@@ -131,7 +131,7 @@ const addGroupMembers = async (req, res) => {
   try {
     const { conversationId } = req.params;
     const { friendIds } = req.body;
-    const userId = req.user;
+    const userId = req.userId;
 
     const conversation = await Conversation.findById(conversationId);
     if (!conversation) {

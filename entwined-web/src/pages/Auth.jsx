@@ -76,16 +76,41 @@ export default function Auth() {
     setLoading(true);
 
     try {
+      console.log("🔐 [LOGIN] Sending login request...");
       const res = await axios.post(
         `${API}/login`,
         { email, password },
         { withCredentials: true }
       );
 
+      console.log("✅ [LOGIN] Login response received:", {
+        hasUser: !!res.data.user,
+        hasAccessToken: !!res.data.accessToken,
+        accessTokenLength: res.data.accessToken?.length || 0,
+        accessTokenPreview: res.data.accessToken?.substring(0, 20) + "..."
+      });
+
+      if (!res.data.accessToken) {
+        console.error("❌ [LOGIN] No accessToken in response!");
+        setError("Login failed: No token received");
+        return;
+      }
+
+      console.log("💾 [LOGIN] Storing token in localStorage...");
       await login(res.data.user, res.data.accessToken);
+      
+      // Verify token was stored
+      const storedToken = localStorage.getItem("token");
+      console.log("✅ [LOGIN] Token stored:", {
+        exists: !!storedToken,
+        length: storedToken?.length || 0,
+        matches: storedToken === res.data.accessToken
+      });
+
       navigate("/dashboard");
 
     } catch (err) {
+      console.error("❌ [LOGIN] Login error:", err);
       const message =
         err.response?.data?.message ||
         err.message ||
@@ -138,16 +163,41 @@ export default function Auth() {
     setLoading(true);
 
     try {
+      console.log("🔐 [GOOGLE LOGIN] Sending Google login request...");
       const res = await axios.post(
         `${API}/google`,
         { token: credentialResponse.credential },
         { withCredentials: true }
       );
 
-      await login(res.data.user, res.data.accessToken);
+      const backendToken = res.data.accessToken || res.data.token;
+
+      console.log("✅ [GOOGLE LOGIN] Login response received:", {
+        hasUser: !!res.data.user,
+        hasAccessToken: !!res.data.accessToken,
+        hasFallbackToken: !!res.data.token,
+        tokenLength: backendToken?.length || 0,
+      });
+
+      if (!backendToken) {
+        console.error("❌ [GOOGLE LOGIN] No token in response!", res.data);
+        setError("Google login failed: No token received from server");
+        return;
+      }
+
+      console.log("💾 [GOOGLE LOGIN] Storing token in localStorage...");
+      await login(res.data.user, backendToken);
+      
+      const storedToken = localStorage.getItem("token");
+      console.log("✅ [GOOGLE LOGIN] Token stored:", {
+        exists: !!storedToken,
+        length: storedToken?.length || 0
+      });
+
       navigate("/dashboard");
 
     } catch (err) {
+      console.error("❌ [GOOGLE LOGIN] Login error:", err);
       setError(
         err.response?.data?.message ||
         err.message ||

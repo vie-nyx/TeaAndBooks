@@ -297,6 +297,28 @@ const googleLogin = async (req, res) => {
     res.status(500).json({ message: "Google login failed" });
   }
 };
+
+/* ================= VERIFY TOKEN ================= */
+// Used by frontend to validate stored access token and fetch current user
+const verifyToken = async (req, res) => {
+  try {
+    const user = req.user;
+    res.json({
+      valid: true,
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        name: user.name,
+        bio: user.bio,
+        profileImage: user.profileImage || user.avatar,
+        createdAt: user.createdAt
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message || "Verification failed" });
+  }
+};
 module.exports = {
   signup,
   login,
@@ -306,5 +328,6 @@ module.exports = {
   refreshTokenHandler,
   logout,
   logoutAll,
-  googleLogin
+  googleLogin,
+  verifyToken
 };

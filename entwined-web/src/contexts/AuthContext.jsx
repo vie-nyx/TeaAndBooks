@@ -64,7 +64,30 @@ export const AuthProvider = ({ children }) => {
   };
 
   const login = async (userData, token) => {
+    console.log("🔑 [AUTH CONTEXT] login() called with:", {
+      hasUserData: !!userData,
+      hasToken: !!token,
+      tokenType: typeof token,
+      tokenLength: token?.length || 0,
+      tokenPreview: token ? token.substring(0, 30) + "..." : "null"
+    });
+
+    if (!token) {
+      console.error("❌ [AUTH CONTEXT] No token provided to login()!");
+      return;
+    }
+
+    console.log("💾 [AUTH CONTEXT] Setting token in localStorage...");
     localStorage.setItem("token", token);
+    
+    // Verify it was stored
+    const verifyStored = localStorage.getItem("token");
+    console.log("✅ [AUTH CONTEXT] Token storage verified:", {
+      stored: !!verifyStored,
+      matches: verifyStored === token,
+      length: verifyStored?.length || 0
+    });
+
     // Set user immediately for faster UI update
     setUser(userData);
     

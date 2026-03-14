@@ -160,31 +160,36 @@ export default function Chat() {
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (!file || !selectedConversation) return;
-
-    // Validate file type
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp", "application/pdf", "application/epub+zip"];
+  
     const ext = file.name.toLowerCase().split(".").pop();
-    const isAllowed = allowedTypes.includes(file.type) || 
-                     ["pdf", "epub"].includes(ext) ||
-                     file.type === "application/octet-stream" && ["pdf", "epub"].includes(ext);
-
-    if (!isAllowed) {
-      alert("Only images (JPEG, PNG, GIF, WebP), PDF, and EPUB files are allowed");
+  
+    const allowedImageTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp"
+    ];
+  
+    const isImage = allowedImageTypes.includes(file.type);
+    const isPdf = ext === "pdf";
+    const isEpub = ext === "epub";
+  
+    if (!isImage && !isPdf && !isEpub) {
+      alert("Only images, PDF, and EPUB files are allowed");
       fileInputRef.current.value = "";
       return;
     }
-
-    // Check file size (50MB limit)
+  
     if (file.size > 50 * 1024 * 1024) {
-      alert("File size must be less than 50MB");
+      alert("File must be under 50MB");
       fileInputRef.current.value = "";
       return;
     }
-
-    // Show preview
+  
     setPreviewFile({
       file,
-      type: file.type.startsWith("image/") ? "image" : ext === "pdf" ? "pdf" : "epub",
+      type: isImage ? "image" : isPdf ? "pdf" : "epub",
       name: file.name,
       size: file.size
     });
@@ -235,13 +240,23 @@ export default function Chat() {
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   };
 
-  const downloadFile = (fileUrl, fileName) => {
-    const link = document.createElement("a");
-    link.href = `${import.meta.env.VITE_API_URL}${fileUrl}`;
-    link.download = fileName || "download";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const downloadFile = async (fileUrl, fileName) => {
+    try {
+      const response = await fetch(fileUrl);
+      const blob = await response.blob();
+  
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName || "download";
+  
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      URL.revokeObjectURL(link.href);
+    } catch (err) {
+      console.error("Download failed:", err);
+    }
   };
 
   const handleTyping = () => {
@@ -389,7 +404,7 @@ export default function Chat() {
                 >
                   {message.imageUrl && (
                     <img
-                      src={`${import.meta.env.VITE_API_URL}${message.imageUrl}`}
+                      src={message.imageUrl}
                       alt="Shared"
                       className="message-image"
                     />

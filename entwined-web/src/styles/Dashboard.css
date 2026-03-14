@@ -44,6 +44,345 @@
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.05);
   }
+
+  /* Feed layout */
+  .feed-layout {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .feed-inner {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .post-card {
+    background: #181a21;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 20px;
+    overflow: hidden;
+    color: #f5f5f5;
+  }
+
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+
+  .post-user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #2563eb, #9333ea);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: #f9fafb;
+    overflow: hidden;
+  }
+
+  .post-user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .post-username {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .post-image-wrapper {
+    width: 100%;
+    background: #050816;
+  }
+
+  .post-image-wrapper img {
+    display: block;
+    width: 100%;
+    max-height: 520px;
+    object-fit: cover;
+  }
+
+  .post-body {
+    padding: 12px 16px 8px;
+  }
+
+  .post-caption {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .post-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .like-button {
+    background: transparent;
+    border: none;
+    color: #f97316;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+  }
+
+  .like-button.liked {
+    color: #fb7185;
+  }
+
+  .like-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .likes-count {
+    font-size: 13px;
+    color: #9ca3af;
+  }
+
+  .comments-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  .comment-item {
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .comment-username {
+    font-weight: 600;
+    margin-right: 4px;
+  }
+
+  .comment-input-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .comment-input-row input {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 999px;
+    border: 1px solid #2a2d36;
+    background: #0b0c10;
+    color: #f9fafb;
+    font-size: 13px;
+  }
+
+  .comment-input-row input:focus {
+    outline: none;
+    border-color: #6366f1;
+  }
+
+  .comment-input-row button {
+    border-radius: 999px;
+    border: none;
+    padding: 0 14px;
+    background: #2563eb;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .comment-input-row button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Create post floating button + modal */
+  .create-post-fab {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg, #2563eb, #9333ea);
+    color: #f9fafb;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+    z-index: 50;
+  }
+
+  .create-post-fab:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 22px 50px rgba(0, 0, 0, 0.55);
+  }
+
+  .create-post-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 40;
+  }
+
+  .create-post-modal {
+    width: 100%;
+    max-width: 480px;
+    background: #0b0c10;
+    border-radius: 20px;
+    padding: 20px 20px 16px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
+  }
+
+  .create-post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .create-post-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #e5e7eb;
+  }
+
+  .create-post-close {
+    background: transparent;
+    border: none;
+    color: #9ca3af;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  .create-post-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .create-post-upload {
+    border: 1px dashed #4b5563;
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.15), transparent 60%);
+  }
+
+  .create-post-upload input {
+    display: none;
+  }
+
+  .create-post-upload span {
+    display: block;
+    font-size: 14px;
+    color: #9ca3af;
+  }
+
+  .create-post-preview {
+    border-radius: 14px;
+    overflow: hidden;
+    max-height: 320px;
+  }
+
+  .create-post-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .create-post-caption {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #4b5563;
+    background: rgba(15, 23, 42, 0.9);
+    color: #e5e7eb;
+    padding: 10px 12px;
+    font-size: 14px;
+    resize: none;
+    min-height: 70px;
+  }
+
+  .create-post-caption:focus {
+    outline: none;
+    border-color: #6366f1;
+  }
+
+  .create-post-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .create-post-actions button {
+    border-radius: 999px;
+    border: none;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .create-post-cancel {
+    background: #111827;
+    color: #e5e7eb;
+  }
+
+  .create-post-submit {
+    background: linear-gradient(135deg, #2563eb, #9333ea);
+    color: white;
+  }
+
+  .create-post-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .post-skeleton {
+    background: #181a21;
+    border-radius: 16px;
+    border: 1px solid rgba(31, 41, 55, 0.7);
+    padding: 16px;
+    margin-bottom: 20px;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .feed-layout {
+      padding: 10px;
+    }
+
+    .create-post-modal {
+      max-width: 95%;
+    }
+  }
   
   .search-input {
     width: 100%;

@@ -14,12 +14,12 @@ router.post("/request", auth, async (req, res) => {
     return res.status(404).json({ message: "User not found" });
   }
 
-  if (receiver._id.toString() === req.user) {
+  if (receiver._id.toString() === req.userId.toString()) {
     return res.status(400).json({ message: "Cannot friend yourself" });
   }
 
   const existing = await FriendRequest.findOne({
-    sender: req.user,
+    sender: req.userId,
     receiver: receiver._id,
     status: "pending"
   });
@@ -29,7 +29,7 @@ router.post("/request", auth, async (req, res) => {
   }
 
   const request = await FriendRequest.create({
-    sender: req.user,
+    sender: req.userId,
     receiver: receiver._id
   });
 
@@ -45,7 +45,7 @@ router.post("/accept/:id", auth, async (req, res) => {
     return res.status(404).json({ message: "Request not found" });
   }
 
-  if (request.receiver.toString() !== req.user) {
+  if (request.receiver.toString() !== req.userId.toString()) {
     return res.status(403).json({ message: "Not authorized" });
   }
 
@@ -74,7 +74,7 @@ router.get("/search", auth, async (req, res) => {
   });
   router.get("/incoming", auth, async (req, res) => {
     const requests = await FriendRequest.find({
-      receiver: req.user,
+      receiver: req.userId,
       status: "pending"
     }).populate("sender", "username");
   
@@ -82,7 +82,7 @@ router.get("/search", auth, async (req, res) => {
   });
   router.get("/outgoing", auth, async (req, res) => {
     const requests = await FriendRequest.find({
-      sender: req.user,
+      sender: req.userId,
       status: "pending"
     }).populate("receiver", "username");
   
@@ -90,11 +90,11 @@ router.get("/search", auth, async (req, res) => {
   });
   router.get("/list", auth, async (req, res) => {
     const friendships = await Friendship.find({
-      users: req.user
-    }).populate("users", "username");
+      users: req.userId
+    }).populate("users", "username avatar profileImage name");
   
     const friends = friendships.map(f =>
-      f.users.find(u => u._id.toString() !== req.user)
+      f.users.find(u => u._id.toString() !== req.userId.toString())
     );
   
     res.json(friends);

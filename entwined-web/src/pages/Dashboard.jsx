@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import api from "../api/api";
-import Chat from "../components/Chat";
 import "../styles/Dashboard.css";
+import Chat from "../components/Chat";
+import CreatePost from "../components/CreatePost";
+import PostFeed from "../components/PostFeed";
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState("chat"); // "chat" or "friends"
+  const [activeTab, setActiveTab] = useState("chat"); // "chat", "feed", or "friends"
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [incoming, setIncoming] = useState([]);
@@ -74,6 +76,12 @@ export default function Dashboard() {
           Chat
         </button>
         <button
+          className={`tab-button ${activeTab === "feed" ? "active" : ""}`}
+          onClick={() => setActiveTab("feed")}
+        >
+          Feed
+        </button>
+        <button
           className={`tab-button ${activeTab === "friends" ? "active" : ""}`}
           onClick={() => setActiveTab("friends")}
         >
@@ -83,6 +91,11 @@ export default function Dashboard() {
 
       {activeTab === "chat" ? (
         <Chat />
+      ) : activeTab === "feed" ? (
+        <div className="feed-layout">
+          <PostFeed />
+          <CreatePost />
+        </div>
       ) : (
         <div className="dashboard-card">
           <h2>Search Users</h2>
