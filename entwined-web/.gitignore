@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+firebaseKey.json
+entwined-server/firebaseKey.json
+.env
+node_modules

@@ -46,7 +46,7 @@ const getOrCreateConversation = async (req, res) => {
 // Create group chat
 const createGroupChat = async (req, res) => {
   try {
-    const { groupName, friendIds } = req.body;
+    const { groupName, friendIds, groupType } = req.body;
     const userId = req.userId;
 
     if (!groupName || !friendIds || friendIds.length === 0) {
@@ -68,7 +68,8 @@ const createGroupChat = async (req, res) => {
       type: "group",
       participants: allIds,
       groupName,
-      groupAdmin: userId
+      groupAdmin: userId,
+      groupType: groupType || "discussion"
     });
 
     const populated = await Conversation.findById(conversation._id)

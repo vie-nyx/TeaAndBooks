@@ -3,7 +3,8 @@ import api from "../api/api";
 import { useSocket } from "../contexts/SocketContext";
 import { useAuth } from "../contexts/AuthContext";
 import "../styles/Chat.css";
-
+import GroupGoals from "../components/group/GroupGoals";
+import ActiveGoalBanner from "../components/group/ActiveGoalBanner";
 export default function Chat() {
   const [conversations, setConversations] = useState([]);
   const [friends, setFriends] = useState([]);
@@ -20,7 +21,9 @@ export default function Chat() {
   const typingTimeoutRef = useRef(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
-
+  const [groupType, setGroupType] = useState("discussion");
+  const [activeTab, setActiveTab] = useState("chat");
+  
   const { socket, isConnected } = useSocket();
   const { user } = useAuth();
 
@@ -30,14 +33,17 @@ export default function Chat() {
   }, []);
 
   useEffect(() => {
+    setActiveTab("chat");
     if (selectedConversation) {
       fetchMessages(selectedConversation._id);
       joinConversation(selectedConversation._id);
     }
-    
+
     return () => {
       if (selectedConversation && socket) {
-        socket.emit("conversation:leave", { conversationId: selectedConversation._id });
+        socket.emit("conversation:leave", {
+          conversationId: selectedConversation._id,
+        });
       }
     };
   }, [selectedConversation]);
@@ -86,7 +92,9 @@ export default function Chat() {
 
   const fetchMessages = async (conversationId) => {
     try {
-      const res = await api.get(`/api/chat/conversation/${conversationId}/messages`);
+      const res = await api.get(
+        `/api/chat/conversation/${conversationId}/messages`,
+      );
       setMessages(res.data);
     } catch (err) {
       console.error("Error fetching messages:", err);
@@ -95,7 +103,9 @@ export default function Chat() {
 
   const joinConversation = (conversationId) => {
     if (socket && selectedConversation) {
-      socket.emit("conversation:leave", { conversationId: selectedConversation._id });
+      socket.emit("conversation:leave", {
+        conversationId: selectedConversation._id,
+      });
     }
     if (socket && conversationId) {
       socket.emit("conversation:join", { conversationId });
@@ -103,13 +113,17 @@ export default function Chat() {
   };
 
   const handleNewMessage = (message) => {
-    if (selectedConversation && message.conversationId === selectedConversation._id) {
+    if (
+      selectedConversation &&
+      message.conversationId === selectedConversation._id
+    ) {
       setMessages((prev) => [...prev, message]);
     }
     fetchConversations(); // Update conversation list
   };
 
   const handleMessageNotification = ({ conversationId, message }) => {
+    console.log("Message notification received:", conversationId, message);
     fetchConversations(); // Update conversation list
   };
 
@@ -131,10 +145,12 @@ export default function Chat() {
 
   const handleUserOnline = ({ userId }) => {
     // Update online status if needed
+    console.log("User online:", userId);
   };
 
   const handleUserOffline = ({ userId }) => {
     // Update offline status if needed
+    console.log("User offline:", userId);
   };
 
   const handleSendMessage = async (e) => {
@@ -147,7 +163,7 @@ export default function Chat() {
       formData.append("text", messageText);
 
       await api.post("/api/chat/message", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       setMessageText("");
@@ -160,38 +176,38 @@ export default function Chat() {
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (!file || !selectedConversation) return;
-  
+
     const ext = file.name.toLowerCase().split(".").pop();
-  
+
     const allowedImageTypes = [
       "image/jpeg",
       "image/jpg",
       "image/png",
       "image/gif",
-      "image/webp"
+      "image/webp",
     ];
-  
+
     const isImage = allowedImageTypes.includes(file.type);
     const isPdf = ext === "pdf";
     const isEpub = ext === "epub";
-  
+
     if (!isImage && !isPdf && !isEpub) {
       alert("Only images, PDF, and EPUB files are allowed");
       fileInputRef.current.value = "";
       return;
     }
-  
+
     if (file.size > 50 * 1024 * 1024) {
       alert("File must be under 50MB");
       fileInputRef.current.value = "";
       return;
     }
-  
+
     setPreviewFile({
       file,
       type: isImage ? "image" : isPdf ? "pdf" : "epub",
       name: file.name,
-      size: file.size
+      size: file.size,
     });
   };
 
@@ -204,17 +220,22 @@ export default function Chat() {
       formData.append("conversationId", selectedConversation._id);
       formData.append("file", previewFile.file);
 
-      console.log("Uploading file:", previewFile.name, "Size:", previewFile.size);
+      console.log(
+        "Uploading file:",
+        previewFile.name,
+        "Size:",
+        previewFile.size,
+      );
       console.log("Conversation ID:", selectedConversation._id);
 
       // Don't set Content-Type header - browser will set it with boundary
       const response = await api.post("/api/chat/message", formData);
-      
+
       console.log("File uploaded successfully:", response.data);
 
       setPreviewFile(null);
       fileInputRef.current.value = "";
-      
+
       // Refresh messages to show the new file
       if (selectedConversation) {
         fetchMessages(selectedConversation._id);
@@ -222,7 +243,10 @@ export default function Chat() {
     } catch (err) {
       console.error("Error uploading file:", err);
       console.error("Error response:", err.response?.data);
-      const errorMessage = err.response?.data?.message || err.message || "Error uploading file. Please try again.";
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Error uploading file. Please try again.";
       alert(errorMessage);
     } finally {
       setUploading(false);
@@ -244,15 +268,15 @@ export default function Chat() {
     try {
       const response = await fetch(fileUrl);
       const blob = await response.blob();
-  
+
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = fileName || "download";
-  
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-  
+
       URL.revokeObjectURL(link.href);
     } catch (err) {
       console.error("Download failed:", err);
@@ -287,7 +311,9 @@ export default function Chat() {
 
   const handleFriendClick = async (friend) => {
     try {
-      const res = await api.post("/api/chat/conversation", { friendId: friend._id });
+      const res = await api.post("/api/chat/conversation", {
+        friendId: friend._id,
+      });
       setSelectedConversation(res.data);
     } catch (err) {
       console.error("Error creating conversation:", err);
@@ -295,28 +321,45 @@ export default function Chat() {
   };
 
   const handleCreateGroup = async () => {
-    if (!groupName.trim() || selectedFriends.length === 0) return;
+  console.log("Create button clicked");
 
-    try {
-      const res = await api.post("/api/chat/conversation/group", {
-        groupName,
-        friendIds: selectedFriends.map(f => f._id)
-      });
-      setConversations((prev) => [res.data, ...prev]);
-      setSelectedConversation(res.data);
-      setShowGroupModal(false);
-      setGroupName("");
-      setSelectedFriends([]);
-    } catch (err) {
-      console.error("Error creating group:", err);
-    }
-  };
+  if (!groupName.trim() || selectedFriends.length === 0) {
+    console.log("Validation failed", { groupName, selectedFriends });
+    return;
+  }
 
+  try {
+    console.log("Sending request...", {
+      groupName,
+      selectedFriends,
+      groupType
+    });
+
+    const res = await api.post("/api/chat/conversation/group", {
+      groupName,
+      friendIds: selectedFriends.map(f => f._id),
+      groupType
+    });
+
+    console.log("Response:", res.data);
+
+    setConversations(prev => [res.data, ...prev]);
+    setSelectedConversation(res.data);
+    setShowGroupModal(false);
+    setGroupName("");
+    setSelectedFriends([]);
+    setGroupType("discussion");
+
+  } catch (err) {
+    console.error("Error creating group:", err);
+    console.error("Error response:", err.response?.data);
+  }
+};
   const toggleFriendSelection = (friend) => {
     setSelectedFriends((prev) =>
-      prev.find(f => f._id === friend._id)
-        ? prev.filter(f => f._id !== friend._id)
-        : [...prev, friend]
+      prev.find((f) => f._id === friend._id)
+        ? prev.filter((f) => f._id !== friend._id)
+        : [...prev, friend],
     );
   };
 
@@ -326,7 +369,7 @@ export default function Chat() {
     }
     const currentUserId = getCurrentUserId();
     const otherUser = conversation.participants.find(
-      p => p._id?.toString() !== currentUserId?.toString()
+      (p) => p._id?.toString() !== currentUserId?.toString(),
     );
     return otherUser?.username || "Unknown";
   };
@@ -335,6 +378,8 @@ export default function Chat() {
     return user?._id;
   };
 
+  const isBookClub = selectedConversation?.groupType === "bookclub";
+  console.log("Selected Conversation:", selectedConversation);
   return (
     <div className="chat-container">
       <div className="chat-left-panel">
@@ -358,13 +403,17 @@ export default function Chat() {
               onClick={() => setSelectedConversation(conv)}
             >
               <div className="conversation-info">
-                <div className="conversation-name">{getConversationName(conv)}</div>
+                <div className="conversation-name">
+                  {getConversationName(conv)}
+                </div>
                 {conv.lastMessage && (
                   <div className="conversation-preview">
-                    {conv.lastMessage.text || 
-                     (conv.lastMessage.imageUrl ? "📷 Image" : 
-                      conv.lastMessage.fileUrl ? `📎 ${conv.lastMessage.fileName || "File"}` : 
-                      "Message")}
+                    {conv.lastMessage.text ||
+                      (conv.lastMessage.imageUrl
+                        ? "📷 Image"
+                        : conv.lastMessage.fileUrl
+                          ? `📎 ${conv.lastMessage.fileName || "File"}`
+                          : "Message")}
                   </div>
                 )}
               </div>
@@ -385,63 +434,111 @@ export default function Chat() {
           ))}
         </div>
       </div>
-
+      
       <div className="chat-right-panel">
         {selectedConversation ? (
           <>
             <div className="chat-header-bar">
-              <h3>{getConversationName(selectedConversation)}</h3>
-              {!isConnected && <span className="connection-status">Disconnected</span>}
-            </div>
+  <h3>{getConversationName(selectedConversation)}</h3>
 
-            <div className="messages-container">
-              {messages.map((message) => (
-                <div
-                  key={message._id}
-                  className={`message ${
-                    message.sender._id?.toString() === getCurrentUserId()?.toString() ? "sent" : "received"
-                  }`}
-                >
-                  {message.imageUrl && (
-                    <img
-                      src={message.imageUrl}
-                      alt="Shared"
-                      className="message-image"
-                    />
-                  )}
-                  {message.fileUrl && (
-                    <div className="message-file" onClick={() => downloadFile(message.fileUrl, message.fileName)}>
-                      <div className="file-icon">
-                        {message.fileType === "pdf" ? "📄" : message.fileType === "epub" ? "📚" : "📎"}
+  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+    {isBookClub && (
+      <div className="chat-tabs">
+        <button
+          className={activeTab === "chat" ? "tab active" : "tab"}
+          onClick={() => setActiveTab("chat")}
+        >
+          Chat
+        </button>
+
+        <button
+          className={activeTab === "goals" ? "tab active" : "tab"}
+          onClick={() => setActiveTab("goals")}
+        >
+          Goals
+        </button>
+      </div>
+    )}
+
+    {!isConnected && (
+      <span className="connection-status">Disconnected</span>
+    )}
+  </div>
+</div>
+
+{isBookClub && (
+  <ActiveGoalBanner conversationId={selectedConversation._id} />
+)}
+            {activeTab === "chat" && (
+              <div className="messages-container">
+                {messages.map((message) => (
+                  <div
+                    key={message._id}
+                    className={`message ${
+                      message.sender._id?.toString() ===
+                      getCurrentUserId()?.toString()
+                        ? "sent"
+                        : "received"
+                    }`}
+                  >
+                    {message.imageUrl && (
+                      <img
+                        src={message.imageUrl}
+                        alt="Shared"
+                        className="message-image"
+                      />
+                    )}
+                    {message.fileUrl && (
+                      <div
+                        className="message-file"
+                        onClick={() =>
+                          downloadFile(message.fileUrl, message.fileName)
+                        }
+                      >
+                        <div className="file-icon">
+                          {message.fileType === "pdf"
+                            ? "📄"
+                            : message.fileType === "epub"
+                              ? "📚"
+                              : "📎"}
+                        </div>
+                        <div className="file-info">
+                          <div className="file-name">
+                            {message.fileName || "File"}
+                          </div>
+                          {message.fileSize && (
+                            <div className="file-size">
+                              {formatFileSize(message.fileSize)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="file-download-icon">⬇️</div>
                       </div>
-                      <div className="file-info">
-                        <div className="file-name">{message.fileName || "File"}</div>
-                        {message.fileSize && (
-                          <div className="file-size">{formatFileSize(message.fileSize)}</div>
-                        )}
-                      </div>
-                      <div className="file-download-icon">⬇️</div>
+                    )}
+                    {message.text && (
+                      <div className="message-text">{message.text}</div>
+                    )}
+                    <div className="message-time">
+                      {new Date(message.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </div>
-                  )}
-                  {message.text && <div className="message-text">{message.text}</div>}
-                  <div className="message-time">
-                    {new Date(message.createdAt).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit"
-                    })}
                   </div>
-                </div>
-              ))}
-              {typingUsers.size > 0 && (
-                <div className="typing-indicator">
-                  {Array.from(typingUsers).map((userId) => (
-                    <span key={userId}>Someone is typing...</span>
-                  ))}
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
+                ))}
+                {typingUsers.size > 0 && (
+                  <div className="typing-indicator">
+                    {Array.from(typingUsers).map((userId) => (
+                      <span key={userId}>Someone is typing...</span>
+                    ))}
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+            {isBookClub && activeTab === "goals" && (
+  <GroupGoals conversationId={selectedConversation._id} />
+)}
             {previewFile && (
               <div className="file-preview">
                 <div className="file-preview-content">
@@ -452,14 +549,17 @@ export default function Chat() {
                       className="file-preview-image"
                     />
                   )}
-                  {(previewFile.type === "pdf" || previewFile.type === "epub") && (
+                  {(previewFile.type === "pdf" ||
+                    previewFile.type === "epub") && (
                     <div className="file-preview-icon">
                       {previewFile.type === "pdf" ? "📄" : "📚"}
                     </div>
                   )}
                   <div className="file-preview-info">
                     <div className="file-preview-name">{previewFile.name}</div>
-                    <div className="file-preview-size">{formatFileSize(previewFile.size)}</div>
+                    <div className="file-preview-size">
+                      {formatFileSize(previewFile.size)}
+                    </div>
                   </div>
                 </div>
                 <div className="file-preview-actions">
@@ -526,6 +626,28 @@ export default function Chat() {
         <div className="modal-overlay" onClick={() => setShowGroupModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>Create Group Chat</h2>
+
+            <div style={{ marginBottom: "10px" }}>
+              <label>
+                <input
+                  type="radio"
+                  value="discussion"
+                  checked={groupType === "discussion"}
+                  onChange={() => setGroupType("discussion")}
+                />
+                Discussion
+              </label>
+
+              <label style={{ marginLeft: "10px" }}>
+                <input
+                  type="radio"
+                  value="bookclub"
+                  checked={groupType === "bookclub"}
+                  onChange={() => setGroupType("bookclub")}
+                />
+                Book Club
+              </label>
+            </div>
             <input
               type="text"
               placeholder="Group name"
@@ -538,7 +660,7 @@ export default function Chat() {
                 <label key={friend._id} className="friend-checkbox">
                   <input
                     type="checkbox"
-                    checked={selectedFriends.some(f => f._id === friend._id)}
+                    checked={selectedFriends.some((f) => f._id === friend._id)}
                     onChange={() => toggleFriendSelection(friend)}
                   />
                   {friend.username}
@@ -555,4 +677,3 @@ export default function Chat() {
     </div>
   );
 }
-

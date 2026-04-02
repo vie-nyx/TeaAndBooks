@@ -17,6 +17,11 @@ const conversationSchema = new mongoose.Schema({
       return this.type === "group";
     }
   },
+  groupType: {
+    type: String,
+    enum: ["discussion", "bookclub"],
+    default: "discussion"
+  },
   groupAdmin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
@@ -35,7 +40,8 @@ const conversationSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  admins: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
 // Index for faster lookups
