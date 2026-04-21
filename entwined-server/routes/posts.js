@@ -4,6 +4,7 @@ const router = express.Router();
 const Post = require("../models/Post");
 const User = require("../models/User");
 const Comment = require("../models/Comments");
+const PostLike = require("../models/PostLike");
 
 const { uploadImage } = require("../middleware/upload");
 
@@ -120,6 +121,10 @@ router.get("/friends-feed", auth, async (req, res) => {
       user: { $in: ids }
     })
       .populate("user", "username profileImage")
+      .populate({
+        path: "comments",
+        populate: { path: "user", select: "username profileImage" }
+      })
       .sort({ createdAt: -1 });
 
     console.log("Posts returned:", posts.length);
@@ -156,9 +161,15 @@ router.post("/like/:postId", auth, async (req, res) => {
     if (alreadyLiked) {
       console.log("User already liked post → removing like");
       post.likes.pull(req.userId);
+      await PostLike.deleteOne({ post: post._id, user: req.userId });
     } else {
       console.log("Adding like to post");
       post.likes.push(req.userId);
+      await PostLike.updateOne(
+        { post: post._id, user: req.userId },
+        { $setOnInsert: { post: post._id, user: req.userId } },
+        { upsert: true }
+      );
     }
 
     await post.save();
@@ -210,13 +221,33 @@ router.post("/comment/:postId", auth, async (req, res) => {
       { $push: { comments: comment._id } }
     );
 
+    const populatedComment = await Comment.findById(comment._id)
+      .populate("user", "username profileImage");
+
     console.log("Comment added to post");
 
-    res.json(comment);
+    res.json(populatedComment);
 
   } catch (err) {
     console.error("Comment error:", err);
     res.status(500).json({ error: "Failed to add comment" });
+  }
+});
+
+/* ===========================
+   GET COMMENTS FOR POST
+=========================== */
+
+router.get("/comments/:postId", auth, async (req, res) => {
+  try {
+    const comments = await Comment.find({ post: req.params.postId })
+      .populate("user", "username profileImage")
+      .sort({ createdAt: 1 });
+
+    return res.json(comments);
+  } catch (err) {
+    console.error("Comments fetch error:", err);
+    return res.status(500).json({ error: "Failed to fetch comments" });
   }
 });
 

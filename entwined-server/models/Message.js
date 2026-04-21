@@ -33,7 +33,8 @@ const messageSchema = new mongoose.Schema({
     type: Number // Size in bytes
   },
   postId: {
-    type: mongoose.Schema.Types.ObjectId
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Post"
   },
   readBy: [{
     user: {
@@ -52,6 +53,7 @@ const messageSchema = new mongoose.Schema({
 });
 
 messageSchema.index({ conversationId: 1, createdAt: -1 });
+messageSchema.index({ postId: 1, createdAt: -1 });
 
 module.exports = mongoose.model("Message", messageSchema);
 

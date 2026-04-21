@@ -119,6 +119,11 @@ const getMessages = async (req, res) => {
 
     const messages = await Message.find({ conversationId })
       .populate("sender", "username avatar")
+      .populate({
+        path: "postId",
+        select: "caption imageUrl user createdAt",
+        populate: { path: "user", select: "username profileImage" }
+      })
       .sort({ createdAt: 1 });
 
     res.json(messages);

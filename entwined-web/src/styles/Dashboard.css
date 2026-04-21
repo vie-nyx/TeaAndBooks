@@ -152,6 +152,19 @@
     color: #9ca3af;
   }
 
+  .post-action-secondary {
+    background: transparent;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 0;
+  }
+
+  .post-action-secondary:hover {
+    color: #d1d5db;
+  }
+
   .comments-section {
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     margin-top: 8px;
@@ -201,6 +214,58 @@
 
   .comment-input-row button:disabled {
     opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .share-panel {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    margin-top: 10px;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .share-note-input {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #2a2d36;
+    background: #0b0c10;
+    color: #f9fafb;
+    padding: 10px 12px;
+    resize: vertical;
+    min-height: 64px;
+    font-size: 13px;
+  }
+
+  .share-note-input:focus {
+    outline: none;
+    border-color: #6366f1;
+  }
+
+  .share-conversations {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .share-conversation-btn {
+    border: 1px solid #2a2d36;
+    background: #111318;
+    color: #e5e7eb;
+    border-radius: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 13px;
+  }
+
+  .share-conversation-btn:hover {
+    border-color: #4b5563;
+  }
+
+  .share-conversation-btn:disabled {
+    opacity: 0.6;
     cursor: not-allowed;
   }
 

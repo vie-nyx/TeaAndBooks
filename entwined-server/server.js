@@ -18,6 +18,8 @@ const { initializeSocket } = require("./socket/socketHandler");
 
 const Message = require("./models/Message");
 const Conversation = require("./models/Conversation");
+const Post = require("./models/Post");
+const SharedPost = require("./models/SharedPost");
 
 const auth = require("./middleware/authMiddleware");
 
@@ -125,6 +127,16 @@ app.post("/api/chat/message",
     try {
 
       const { conversationId, text, postId } = req.body;
+      let sharedPost = null;
+      if (postId) {
+        sharedPost = await Post.findById(postId);
+        if (!sharedPost) {
+          return res.status(404).json({
+            message: "Post not found",
+          });
+        }
+      }
+
       const userId = req.userId;
 
       if (!conversationId) {
@@ -198,6 +210,23 @@ app.post("/api/chat/message",
       });
 
       await message.populate("sender", "username avatar");
+      await message.populate("postId", "caption imageUrl user createdAt");
+      if (message.postId) {
+        await message.populate({
+          path: "postId",
+          populate: { path: "user", select: "username profileImage" },
+        });
+      }
+
+      if (sharedPost) {
+        await SharedPost.create({
+          post: sharedPost._id,
+          sharedBy: userId,
+          conversation: conversationId,
+          message: message._id,
+          note: text || "",
+        });
+      }
 
       conversation.lastMessage = message._id;
       conversation.lastMessageAt = new Date();

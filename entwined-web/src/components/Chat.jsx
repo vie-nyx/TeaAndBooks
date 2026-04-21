@@ -408,12 +408,14 @@ export default function Chat() {
                 </div>
                 {conv.lastMessage && (
                   <div className="conversation-preview">
-                    {conv.lastMessage.text ||
-                      (conv.lastMessage.imageUrl
-                        ? "📷 Image"
-                        : conv.lastMessage.fileUrl
-                          ? `📎 ${conv.lastMessage.fileName || "File"}`
-                          : "Message")}
+                    {conv.lastMessage.text
+                      || (conv.lastMessage.postId
+                        ? "🔁 Shared a post"
+                        : conv.lastMessage.imageUrl
+                          ? "📷 Image"
+                          : conv.lastMessage.fileUrl
+                            ? `📎 ${conv.lastMessage.fileName || "File"}`
+                            : "Message")}
                   </div>
                 )}
               </div>
@@ -517,6 +519,23 @@ export default function Chat() {
                     )}
                     {message.text && (
                       <div className="message-text">{message.text}</div>
+                    )}
+                    {message.postId && (
+                      <div className="shared-post-preview">
+                        <div className="shared-post-header">
+                          Shared post by @{message.postId.user?.username || "Reader"}
+                        </div>
+                        {message.postId.imageUrl && (
+                          <img
+                            src={message.postId.imageUrl}
+                            alt="Shared post"
+                            className="shared-post-image"
+                          />
+                        )}
+                        {message.postId.caption && (
+                          <div className="shared-post-caption">{message.postId.caption}</div>
+                        )}
+                      </div>
                     )}
                     <div className="message-time">
                       {new Date(message.createdAt).toLocaleTimeString([], {
