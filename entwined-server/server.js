@@ -13,6 +13,11 @@ const friendRoutes = require("./routes/friendRoutes");
 const postRoutes = require("./routes/posts");
 const { router: chatRoutes, upload } = require("./routes/chatRoutes");
 const groupGoalRoutes = require("./routes/groupGoalRoutes");
+const profileRoutes = require("./routes/profileRoutes");
+const libraryRoutes = require("./routes/libraryRoutes");
+const journalRoutes = require("./routes/journalRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 const { initializeSocket } = require("./socket/socketHandler");
 
@@ -77,6 +82,11 @@ ROUTES
 app.use("/api/auth", authRoutes);
 app.use("/api/friends", friendRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/profile", profileRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/library", libraryRoutes);
+app.use("/api/journal", journalRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 // ✅ Chat routes
 app.use("/api/chat", chatRoutes);

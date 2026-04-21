@@ -492,3 +492,257 @@
   .user-result button:hover {
     background: #5457e5;
   }
+
+  .profile-dashboard {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    color: #e5e7eb;
+  }
+
+  .profile-header-card {
+    background: #181a21;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .profile-header-main {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .profile-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #2563eb, #9333ea);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    overflow: hidden;
+  }
+
+  .profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .profile-header-info h2 {
+    margin: 0 0 4px;
+  }
+
+  .profile-header-info p {
+    margin: 0 0 8px;
+    color: #9ca3af;
+  }
+
+  .profile-meta-row {
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .profile-genre-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .genre-pill {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #111318;
+    border: 1px solid #2a2d36;
+  }
+
+  .profile-header-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .profile-header-actions button {
+    border: none;
+    border-radius: 10px;
+    padding: 8px 12px;
+    background: #2563eb;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .profile-edit-grid {
+    margin-top: 12px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .profile-edit-grid input,
+  .profile-edit-grid textarea {
+    background: #111318;
+    border: 1px solid #2a2d36;
+    color: #e5e7eb;
+    border-radius: 10px;
+    padding: 10px;
+  }
+
+  .reading-stats-row {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  .stat-card {
+    background: #181a21;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .profile-subtabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .profile-tab-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .library-add-row {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 2fr 1.5fr 1fr auto;
+  }
+
+  .library-add-row input,
+  .library-add-row select,
+  .library-add-row button {
+    border-radius: 10px;
+    border: 1px solid #2a2d36;
+    background: #111318;
+    color: #e5e7eb;
+    padding: 10px;
+  }
+
+  .library-add-row button {
+    background: #2563eb;
+    border: none;
+    cursor: pointer;
+  }
+
+  .library-shelf-card,
+  .review-card,
+  .review-create-card,
+  .activity-card,
+  .club-card,
+  .journal-card {
+    background: #181a21;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 12px;
+  }
+
+  .library-book-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 8px 0;
+  }
+
+  .library-book-row span {
+    display: block;
+    color: #9ca3af;
+    font-size: 13px;
+  }
+
+  .library-book-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .library-book-actions select,
+  .library-book-actions button {
+    border-radius: 8px;
+    border: 1px solid #2a2d36;
+    background: #111318;
+    color: #e5e7eb;
+    padding: 6px 8px;
+  }
+
+  .activity-grid {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .review-create-card textarea,
+  .review-create-card input,
+  .journal-card textarea,
+  .journal-card input {
+    width: 100%;
+    margin-top: 8px;
+    border-radius: 10px;
+    border: 1px solid #2a2d36;
+    background: #111318;
+    color: #e5e7eb;
+    padding: 10px;
+  }
+
+  .review-create-row {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .review-create-row button,
+  .journal-card button {
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #fff;
+    padding: 10px 12px;
+    cursor: pointer;
+  }
+
+  .journal-public-toggle {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .journal-list {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .journal-entry {
+    border-radius: 10px;
+    border: 1px solid #2a2d36;
+    padding: 10px;
+    background: #111318;
+  }
+
+  .profile-feedback {
+    background: #111827;
+    border: 1px solid #2563eb;
+    color: #c7d2fe;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+  }

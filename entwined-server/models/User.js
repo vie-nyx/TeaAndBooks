@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema({
   password: { type: String },
   bio: { type: String, trim: true, maxlength: 250, default: "" },
   profileImage: { type: String, default: "" },
+  favoriteGenres: [{ type: String, trim: true }],
+  readingPersona: { type: String, trim: true, default: "" },
   // kept for backward compatibility with existing chat UI
   avatar: { type: String, default: "" },
   books: [
@@ -25,6 +27,13 @@ const userSchema = new mongoose.Schema({
   ],
   followers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  readingStats: {
+    totalBooksRead: { type: Number, default: 0 },
+    currentlyReading: { type: Number, default: 0 },
+    wantToRead: { type: Number, default: 0 },
+    readingStreak: { type: Number, default: 0 },
+    lastUpdatedAt: { type: Date, default: Date.now }
+  },
   posts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Post" }],
   createdAt: { type: Date, default: Date.now },
   isVerified: {

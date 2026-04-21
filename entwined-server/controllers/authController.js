@@ -312,6 +312,9 @@ const verifyToken = async (req, res) => {
         name: user.name,
         bio: user.bio,
         profileImage: user.profileImage || user.avatar,
+        favoriteGenres: user.favoriteGenres || [],
+        readingPersona: user.readingPersona || "",
+        readingStats: user.readingStats || {},
         createdAt: user.createdAt
       }
     });

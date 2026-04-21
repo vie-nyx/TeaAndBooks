@@ -4,9 +4,10 @@ import "../styles/Dashboard.css";
 import Chat from "../components/Chat";
 import CreatePost from "../components/CreatePost";
 import PostFeed from "../components/PostFeed";
+import ProfileDashboard from "../components/profile/ProfileDashboard";
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState("chat"); // "chat", "feed", or "friends"
+  const [activeTab, setActiveTab] = useState("chat"); // "chat", "feed", "friends", or "profile"
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [incoming, setIncoming] = useState([]);
@@ -87,6 +88,12 @@ export default function Dashboard() {
         >
           Friends
         </button>
+        <button
+          className={`tab-button ${activeTab === "profile" ? "active" : ""}`}
+          onClick={() => setActiveTab("profile")}
+        >
+          Profile
+        </button>
       </div>
 
       {activeTab === "chat" ? (
@@ -95,6 +102,10 @@ export default function Dashboard() {
         <div className="feed-layout">
           <PostFeed />
           <CreatePost />
+        </div>
+      ) : activeTab === "profile" ? (
+        <div className="feed-layout">
+          <ProfileDashboard />
         </div>
       ) : (
         <div className="dashboard-card">
