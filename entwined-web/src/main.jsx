@@ -29,21 +29,22 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               </ProtectedRoute>
             }
           />
+          <Route
+    path="/profile/:id?" // The ? makes the ID optional
+    element={
+      <ProtectedRoute>
+        <SocketProvider>
+          <Dashboard />
+        </SocketProvider>
+      </ProtectedRoute>
+    }
+  />
           <Route path="/verify-email/:token" element={<VerifyEmail />} />
-<Route path="/forgot-password" element={<ForgotPassword />} />
-<Route path="/reset-password/:token" element={<ResetPassword />} />
-<Route
-  path="/profile/:id"
-  element={
-    <ProtectedRoute>
-      <SocketProvider>
-        <ProfileDashboard />
-      </SocketProvider>
-    </ProtectedRoute>
-  }
-/>
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          
         </Routes>
       </BrowserRouter>
     </AuthProvider>
-  </GoogleOAuthProvider>
+  </GoogleOAuthProvider>,
 );

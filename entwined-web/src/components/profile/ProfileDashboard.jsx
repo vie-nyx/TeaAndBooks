@@ -80,7 +80,13 @@ export default function ProfileDashboard() {
 
   const { id } = useParams();
 
-const userId = id || user?._id;
+const resolvedRouteId =
+  id === "me"
+    ? user?._id
+    : id;
+
+const userId =
+  resolvedRouteId || user?._id;
 
   const loadData = useCallback(async () => {
     if (!userId) return;
