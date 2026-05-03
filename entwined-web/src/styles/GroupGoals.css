@@ -1,50 +1,77 @@
 /* =========================
-MAIN CONTAINER
+GLOBAL
 ========================= */
 
-.goals-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 28px;
-
+html,
+body,
+#root {
   width: 100%;
-  padding: 24px 0;
-  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
-/* 🔥 SINGLE SOURCE OF WIDTH (fixes alignment issue) */
-.goals-container > * {
-  width: 100%;
-  max-width: 850px;
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+  min-width: 0;
 }
 
 /* =========================
-HEADER (CENTERED + CLEAN)
+CONTAINER
+========================= */
+
+.goals-container {
+  width: 100%;
+
+  max-width: 520px;
+
+  margin: 0 auto;
+
+  padding:
+    8px 14px
+    120px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+
+
+/* =========================
+TITLE
 ========================= */
 
 .goals-container h3 {
   margin: 0;
   text-align: center;
+  font-size: 1.7rem;
+  font-weight: 800;
 
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #ffffff;
+  letter-spacing: -0.03em;
 
-  letter-spacing: 0.5px;
+  color: #0f172a;
 }
 
-/* centered underline */
 .goals-container h3::after {
   content: "";
-  display: block;
-  width: 60px;
-  height: 2px;
 
-  background: #2563eb;
+  display: block;
+
+  width: 62px;
+  height: 4px;
+
   margin: 10px auto 0;
-  border-radius: 2px;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c6cf2,
+      #a78bfa
+    );
 }
 
 /* =========================
@@ -54,67 +81,115 @@ FORM
 .goal-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
 
-  background: #111111;
-  padding: 24px;
-  border-radius: 16px;
-  border: 1px solid #1f1f1f;
+  gap: 10px;
 
-  box-shadow: 0 6px 25px rgba(0,0,0,0.4);
+  padding: 18px;
+
+  border-radius: 24px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,0.96),
+      rgba(248,250,252,0.98)
+    );
+
+  border:
+    1px solid rgba(226,232,240,0.7);
+
+  box-shadow:
+    0 4px 14px rgba(15,23,42,0.04);
 }
+
+/* =========================
+INPUTS
+========================= */
 
 .goal-form input,
 .goal-form textarea {
   width: 100%;
-  box-sizing: border-box;
 
-  padding: 14px;
-  border-radius: 10px;
-  border: 1px solid #2a2a2a;
+  padding: 13px 15px;
 
-  background: #050505;
-  color: #ffffff;
-  font-size: 15px;
+  border-radius: 14px;
+
+  border:
+    1px solid #dbe4ee;
+
+  background:
+    rgba(248,250,252,0.92);
+
+  color: #0f172a;
+
+  font-size: 14px;
 
   outline: none;
-  transition: all 0.2s ease;
+
+  transition:
+    all 0.22s ease;
+}
+
+.goal-form textarea {
+  min-height: 90px;
+
+  resize: none;
+
+  line-height: 1.6;
+}
+
+.goal-form input::placeholder,
+.goal-form textarea::placeholder {
+  color: #94a3b8;
 }
 
 .goal-form input:focus,
 .goal-form textarea:focus {
-  border-color: #2563eb;
-  background: #0a0a0a;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  border-color: #a78bfa;
+
+  background: white;
+
+  box-shadow:
+    0 0 0 5px rgba(167,139,250,0.12);
 }
 
-/* calendar icon */
-.goal-form input::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  filter: invert(1);
-}
+/* =========================
+BUTTON
+========================= */
 
-/* button */
 .goal-form button {
-  margin-top: 8px;
+  width: 100%;
 
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  color: white;
+  height: 48px;
 
   border: none;
-  padding: 14px;
-  border-radius: 10px;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7c6cf2,
+      #a78bfa
+    );
+
+  color: white;
+
+  font-size: 15px;
+  font-weight: 700;
 
   cursor: pointer;
-  font-weight: 700;
-  font-size: 15px;
 
-  transition: all 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .goal-form button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.3);
+
+  box-shadow:
+    0 10px 24px rgba(124,108,242,0.16);
 }
 
 /* =========================
@@ -124,7 +199,8 @@ GOALS LIST
 .goals-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+
+  gap: 12px;
 }
 
 /* =========================
@@ -132,94 +208,73 @@ GOAL CARD
 ========================= */
 
 .goal-card {
-  background: #151515;
-  padding: 22px;
-  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
 
-  border: 1px solid #222;
-  transition: all 0.2s ease;
+  gap: 10px;
 
-  position: relative;
+  padding: 18px;
+
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,0.96),
+      rgba(248,250,252,0.98)
+    );
+
+  border:
+    1px solid rgba(226,232,240,0.7);
+
+  box-shadow:
+    0 4px 14px rgba(15,23,42,0.04);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .goal-card:hover {
-  border-color: #333;
-  transform: translateY(-2px);
-}
+  transform: translateY(-1px);
 
-/* ACTIVE STATE */
+  border-color:
+    rgba(167,139,250,0.18);
 
-.goal-card.active {
-  border-color: #2563eb;
-  background: #111111;
-  box-shadow: inset 4px 0 0 #2563eb;
+  box-shadow:
+    0 10px 24px rgba(167,139,250,0.08);
 }
 
 /* =========================
-TEXT
+ACTIVE CARD
+========================= */
+
+.goal-card.active {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(245,243,255,0.96),
+      rgba(250,245,255,0.98)
+    );
+
+  border-color:
+    rgba(167,139,250,0.26);
+}
+
+/* =========================
+HEADER ROW
 ========================= */
 
 .goal-card h4 {
-  margin: 0 0 10px 0;
+  margin: 0;
+
   font-size: 1.2rem;
-  color: #ffffff;
-}
+  font-weight: 800;
 
-.goal-card p {
-  margin: 6px 0;
-  font-size: 0.95rem;
-  color: #a0a0a0;
-  line-height: 1.5;
-}
+  line-height: 1.2;
 
-/* =========================
-ACTIONS
-========================= */
-
-.goal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-
-  margin-top: 18px;
-  padding-top: 12px;
-
-  border-top: 1px solid #222;
-}
-
-.goal-actions button {
-  padding: 8px 16px;
-  border-radius: 8px;
-
-  font-size: 13px;
-  font-weight: 600;
-
-  cursor: pointer;
-  border: none;
-
-  transition: all 0.2s ease;
-}
-
-/* edit */
-.goal-actions button:first-child {
-  background: #222;
-  color: #eee;
-}
-
-.goal-actions button:first-child:hover {
-  background: #333;
-}
-
-/* set active */
-.goal-actions button:last-child {
-  background: rgba(37, 99, 235, 0.1);
-  color: #3b82f6;
-  border: 1px solid rgba(37, 99, 235, 0.3);
-}
-
-.goal-actions button:last-child:hover {
-  background: #2563eb;
-  color: #fff;
+  color: #0f172a;
 }
 
 /* =========================
@@ -227,17 +282,218 @@ ACTIVE BADGE
 ========================= */
 
 .active-badge {
-  position: absolute;
-  top: 16px;
-  right: 18px;
-
-  background: #2563eb;
-  color: white;
+  align-self: flex-start;
 
   padding: 5px 10px;
-  border-radius: 6px;
 
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  border-radius: 999px;
+
+  background:
+    rgba(167,139,250,0.14);
+
+  color: #6d5bd0;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* =========================
+CONTENT
+========================= */
+
+.goal-main-text {
+  margin: 0;
+
+  font-size: 15px;
+
+  color: #334155;
+
+  line-height: 1.6;
+}
+
+.goal-date {
+  margin: 0;
+
+  font-size: 13px;
+
+  color: #94a3b8;
+}
+
+.goal-notes {
+  margin: 2px 0 0;
+
+  font-size: 13px;
+
+  line-height: 1.7;
+
+  color: #64748b;
+}
+
+/* =========================
+ACTIONS
+========================= */
+
+.goal-actions {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 10px;
+}
+
+.goal-actions button {
+  flex: 1;
+
+  height: 42px;
+
+  border-radius: 14px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    all 0.22s ease;
+}
+
+/* edit */
+
+.goal-actions button:first-child {
+  background:
+    rgba(248,250,252,0.96);
+
+  color: #334155;
+
+  border:
+    1px solid rgba(203,213,225,0.8);
+}
+
+.goal-actions button:first-child:hover {
+  background: #f1f5f9;
+}
+
+/* active */
+
+.goal-actions button:last-child {
+  background:
+    rgba(167,139,250,0.10);
+
+  color: #6d5bd0;
+
+  border:
+    1px solid rgba(167,139,250,0.22);
+}
+
+.goal-actions button:last-child:hover {
+  background:
+    linear-gradient(
+      135deg,
+      #7c6cf2,
+      #a78bfa
+    );
+
+  color: white;
+
+  border-color: transparent;
+}
+
+/* =========================
+EMPTY STATE
+========================= */
+
+.goals-empty {
+  padding: 22px 18px;
+
+  border-radius: 20px;
+
+  text-align: center;
+
+  color: #64748b;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,0.96),
+      rgba(248,250,252,0.98)
+    );
+
+  border:
+    1px solid rgba(226,232,240,0.7);
+}
+
+/* =========================
+MOBILE
+========================= */
+
+@media (max-width: 768px) {
+
+  .goals-container {
+    gap: 10px;
+  }
+
+  .goals-container h3 {
+    font-size: 1.5rem;
+  }
+
+  .goal-form,
+  .goal-card {
+    padding: 16px;
+
+    border-radius: 20px;
+  }
+  .goal-card {
+    gap: 8px;
+  }
+  .goal-form input,
+  .goal-form textarea {
+    padding: 12px 14px;
+
+    font-size: 14px;
+  }
+
+  .goal-form textarea {
+    min-height: 80px;
+  }
+
+  .goal-card h4 {
+    font-size: 1.1rem;
+  }
+
+  .goal-main-text {
+    font-size: 14px;
+  }
+
+  .goal-notes {
+    font-size: 12px;
+  }
+
+  .goal-actions {
+    flex-direction: column;
+  }
+
+  .goal-actions button {
+    width: 100%;
+  }
+}
+.goal-form,
+.goal-card {
+  width: 100%;
+
+  padding: 16px;
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,0.97),
+      rgba(248,250,252,0.98)
+    );
+
+  border:
+    1px solid rgba(226,232,240,0.7);
+
+  box-shadow:
+    0 4px 12px rgba(15,23,42,0.04);
 }

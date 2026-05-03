@@ -134,7 +134,7 @@ export default function GroupGoals({ conversationId }) {
   */
   return (
     <div className="goals-container">
-      <h3>📚 Group Goals</h3>
+      <h3>Group Goals</h3>
 
       {/* FORM */}
       <div className="goal-form">
@@ -193,15 +193,17 @@ export default function GroupGoals({ conversationId }) {
             >
               <h4>{g.bookTitle}</h4>
 
-              <p>🎯 {g.weeklyGoal}</p>
+              <p className="goal-main-text">
+  {g.weeklyGoal}
+</p>
 
-              {g.meetingDate && (
-                <p>📅 {new Date(g.meetingDate).toLocaleString()}</p>
-              )}
+<p className="goal-date">
+  {new Date(g.meetingDate).toLocaleDateString()}
+</p>
 
-              {g.lastMeetingNotes && (
-                <p>📝 {g.lastMeetingNotes}</p>
-              )}
+<p className="goal-notes">
+  {g.lastMeetingNotes}
+</p>
 
               <div className="goal-actions">
                 <button onClick={() => handleEdit(g)}>Edit</button>
@@ -214,7 +216,9 @@ export default function GroupGoals({ conversationId }) {
               </div>
 
               {g.isActive && (
-                <span className="active-badge">🔥 Active Goal</span>
+                <span className="active-badge">
+                Active
+              </span>
               )}
             </div>
           ))

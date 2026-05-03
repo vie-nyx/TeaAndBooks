@@ -23,7 +23,8 @@ export default function Chat() {
   const fileInputRef = useRef(null);
   const [groupType, setGroupType] = useState("discussion");
   const [activeTab, setActiveTab] = useState("chat");
-  
+  const [mobileView, setMobileView] = useState("list");
+
   const { socket, isConnected } = useSocket();
   const { user } = useAuth();
 
@@ -321,40 +322,39 @@ export default function Chat() {
   };
 
   const handleCreateGroup = async () => {
-  console.log("Create button clicked");
+    console.log("Create button clicked");
 
-  if (!groupName.trim() || selectedFriends.length === 0) {
-    console.log("Validation failed", { groupName, selectedFriends });
-    return;
-  }
+    if (!groupName.trim() || selectedFriends.length === 0) {
+      console.log("Validation failed", { groupName, selectedFriends });
+      return;
+    }
 
-  try {
-    console.log("Sending request...", {
-      groupName,
-      selectedFriends,
-      groupType
-    });
+    try {
+      console.log("Sending request...", {
+        groupName,
+        selectedFriends,
+        groupType,
+      });
 
-    const res = await api.post("/api/chat/conversation/group", {
-      groupName,
-      friendIds: selectedFriends.map(f => f._id),
-      groupType
-    });
+      const res = await api.post("/api/chat/conversation/group", {
+        groupName,
+        friendIds: selectedFriends.map((f) => f._id),
+        groupType,
+      });
 
-    console.log("Response:", res.data);
+      console.log("Response:", res.data);
 
-    setConversations(prev => [res.data, ...prev]);
-    setSelectedConversation(res.data);
-    setShowGroupModal(false);
-    setGroupName("");
-    setSelectedFriends([]);
-    setGroupType("discussion");
-
-  } catch (err) {
-    console.error("Error creating group:", err);
-    console.error("Error response:", err.response?.data);
-  }
-};
+      setConversations((prev) => [res.data, ...prev]);
+      setSelectedConversation(res.data);
+      setShowGroupModal(false);
+      setGroupName("");
+      setSelectedFriends([]);
+      setGroupType("discussion");
+    } catch (err) {
+      console.error("Error creating group:", err);
+      console.error("Error response:", err.response?.data);
+    }
+  };
   const toggleFriendSelection = (friend) => {
     setSelectedFriends((prev) =>
       prev.find((f) => f._id === friend._id)
@@ -382,264 +382,289 @@ export default function Chat() {
   console.log("Selected Conversation:", selectedConversation);
   return (
     <div className="chat-container">
-      <div className="chat-left-panel">
-        <div className="chat-header">
-          <h2>Messages</h2>
-          <button
-            className="create-group-btn"
-            onClick={() => setShowGroupModal(true)}
-          >
-            + Group
-          </button>
-        </div>
-
-        <div className="conversations-list">
-          {conversations.map((conv) => (
-            <div
-              key={conv._id}
-              className={`conversation-item ${
-                selectedConversation?._id === conv._id ? "active" : ""
-              }`}
-              onClick={() => setSelectedConversation(conv)}
+      {(mobileView === "list" || window.innerWidth > 768) && (
+        <div className="chat-left-panel">
+          <div className="chat-header">
+            <h2>Messages</h2>
+            <button
+              className="create-group-btn"
+              onClick={() => setShowGroupModal(true)}
             >
-              <div className="conversation-info">
-                <div className="conversation-name">
-                  {getConversationName(conv)}
-                </div>
-                {conv.lastMessage && (
-                  <div className="conversation-preview">
-                    {conv.lastMessage.text
-                      || (conv.lastMessage.postId
-                        ? "🔁 Shared a post"
-                        : conv.lastMessage.imageUrl
-                          ? "📷 Image"
-                          : conv.lastMessage.fileUrl
-                            ? `📎 ${conv.lastMessage.fileName || "File"}`
-                            : "Message")}
+              + Group
+            </button>
+          </div>
+
+          <div className="conversations-list">
+            {conversations.map((conv) => (
+              <div
+                key={conv._id}
+                className={`conversation-item ${
+                  selectedConversation?._id === conv._id ? "active" : ""
+                }`}
+                onClick={() => {
+                  setSelectedConversation(conv);
+
+                  if (window.innerWidth <= 768) {
+                    setMobileView("chat");
+                  }
+                }}
+              >
+                <div className="conversation-info">
+                  <div className="conversation-name">
+                    {getConversationName(conv)}
                   </div>
-                )}
+                  {conv.lastMessage && (
+                    <div className="conversation-preview">
+                      {conv.lastMessage.text ||
+                        (conv.lastMessage.postId
+                          ? "🔁 Shared a post"
+                          : conv.lastMessage.imageUrl
+                            ? "📷 Image"
+                            : conv.lastMessage.fileUrl
+                              ? `📎 ${conv.lastMessage.fileName || "File"}`
+                              : "Message")}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          <div className="friends-list">
+            <h3>Friends</h3>
+            {friends.map((friend) => (
+              <div
+                key={friend._id}
+                className="friend-item"
+                onClick={() => handleFriendClick(friend)}
+              >
+                {friend.username}
+              </div>
+            ))}
+          </div>
         </div>
+      )}
 
-        <div className="friends-list">
-          <h3>Friends</h3>
-          {friends.map((friend) => (
-            <div
-              key={friend._id}
-              className="friend-item"
-              onClick={() => handleFriendClick(friend)}
-            >
-              {friend.username}
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      <div className="chat-right-panel">
-        {selectedConversation ? (
-          <>
-            <div className="chat-header-bar">
-  <h3>{getConversationName(selectedConversation)}</h3>
-
-  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-    {isBookClub && (
-      <div className="chat-tabs">
-        <button
-          className={activeTab === "chat" ? "tab active" : "tab"}
-          onClick={() => setActiveTab("chat")}
-        >
-          Chat
-        </button>
-
-        <button
-          className={activeTab === "goals" ? "tab active" : "tab"}
-          onClick={() => setActiveTab("goals")}
-        >
-          Goals
-        </button>
-      </div>
-    )}
-
-    {!isConnected && (
-      <span className="connection-status">Disconnected</span>
-    )}
-  </div>
-</div>
-
-{isBookClub && (
-  <ActiveGoalBanner conversationId={selectedConversation._id} />
-)}
-            {activeTab === "chat" && (
-              <div className="messages-container">
-                {messages.map((message) => (
-                  <div
-                    key={message._id}
-                    className={`message ${
-                      message.sender._id?.toString() ===
-                      getCurrentUserId()?.toString()
-                        ? "sent"
-                        : "received"
-                    }`}
+      {(mobileView === "chat" || window.innerWidth > 768) && (
+        <div className="chat-right-panel">
+          {selectedConversation ? (
+            <>
+              <div className="chat-header-bar">
+                {window.innerWidth <= 768 && (
+                  <button
+                    className="mobile-back-btn"
+                    onClick={() => setMobileView("list")}
                   >
-                    {message.imageUrl && (
-                      <img
-                        src={message.imageUrl}
-                        alt="Shared"
-                        className="message-image"
-                      />
-                    )}
-                    {message.fileUrl && (
-                      <div
-                        className="message-file"
-                        onClick={() =>
-                          downloadFile(message.fileUrl, message.fileName)
-                        }
+                    ←
+                  </button>
+                )}
+                <h3>{getConversationName(selectedConversation)}</h3>
+
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
+                  {isBookClub && (
+                    <div className="chat-tabs">
+                      <button
+                        className={activeTab === "chat" ? "tab active" : "tab"}
+                        onClick={() => setActiveTab("chat")}
                       >
-                        <div className="file-icon">
-                          {message.fileType === "pdf"
-                            ? "📄"
-                            : message.fileType === "epub"
-                              ? "📚"
-                              : "📎"}
-                        </div>
-                        <div className="file-info">
-                          <div className="file-name">
-                            {message.fileName || "File"}
+                        Chat
+                      </button>
+
+                      <button
+                        className={activeTab === "goals" ? "tab active" : "tab"}
+                        onClick={() => setActiveTab("goals")}
+                      >
+                        Goals
+                      </button>
+                    </div>
+                  )}
+
+                  {!isConnected && (
+                    <span className="connection-status">Disconnected</span>
+                  )}
+                </div>
+              </div>
+
+              {isBookClub && (
+                <ActiveGoalBanner conversationId={selectedConversation._id} />
+              )}
+              {activeTab === "chat" && (
+                <div className="messages-container">
+                  {messages.map((message) => (
+                    <div
+                      key={message._id}
+                      className={`message ${
+                        message.sender._id?.toString() ===
+                        getCurrentUserId()?.toString()
+                          ? "sent"
+                          : "received"
+                      }`}
+                    >
+                      {message.imageUrl && (
+                        <img
+                          src={message.imageUrl}
+                          alt="Shared"
+                          className="message-image"
+                        />
+                      )}
+                      {message.fileUrl && (
+                        <div
+                          className="message-file"
+                          onClick={() =>
+                            downloadFile(message.fileUrl, message.fileName)
+                          }
+                        >
+                          <div className="file-icon">
+                            {message.fileType === "pdf"
+                              ? "📄"
+                              : message.fileType === "epub"
+                                ? "📚"
+                                : "📎"}
                           </div>
-                          {message.fileSize && (
-                            <div className="file-size">
-                              {formatFileSize(message.fileSize)}
+                          <div className="file-info">
+                            <div className="file-name">
+                              {message.fileName || "File"}
+                            </div>
+                            {message.fileSize && (
+                              <div className="file-size">
+                                {formatFileSize(message.fileSize)}
+                              </div>
+                            )}
+                          </div>
+                          <div className="file-download-icon">⬇️</div>
+                        </div>
+                      )}
+                      {message.text && (
+                        <div className="message-text">{message.text}</div>
+                      )}
+                      {message.postId && (
+                        <div className="shared-post-preview">
+                          <div className="shared-post-header">
+                            Shared post by @
+                            {message.postId.user?.username || "Reader"}
+                          </div>
+                          {message.postId.imageUrl && (
+                            <img
+                              src={message.postId.imageUrl}
+                              alt="Shared post"
+                              className="shared-post-image"
+                            />
+                          )}
+                          {message.postId.caption && (
+                            <div className="shared-post-caption">
+                              {message.postId.caption}
                             </div>
                           )}
                         </div>
-                        <div className="file-download-icon">⬇️</div>
+                      )}
+                      <div className="message-time">
+                        {new Date(message.createdAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </div>
-                    )}
-                    {message.text && (
-                      <div className="message-text">{message.text}</div>
-                    )}
-                    {message.postId && (
-                      <div className="shared-post-preview">
-                        <div className="shared-post-header">
-                          Shared post by @{message.postId.user?.username || "Reader"}
-                        </div>
-                        {message.postId.imageUrl && (
-                          <img
-                            src={message.postId.imageUrl}
-                            alt="Shared post"
-                            className="shared-post-image"
-                          />
-                        )}
-                        {message.postId.caption && (
-                          <div className="shared-post-caption">{message.postId.caption}</div>
-                        )}
-                      </div>
-                    )}
-                    <div className="message-time">
-                      {new Date(message.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
                     </div>
-                  </div>
-                ))}
-                {typingUsers.size > 0 && (
-                  <div className="typing-indicator">
-                    {Array.from(typingUsers).map((userId) => (
-                      <span key={userId}>Someone is typing...</span>
-                    ))}
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-            )}
-            {isBookClub && activeTab === "goals" && (
-  <GroupGoals conversationId={selectedConversation._id} />
-)}
-            {previewFile && (
-              <div className="file-preview">
-                <div className="file-preview-content">
-                  {previewFile.type === "image" && (
-                    <img
-                      src={URL.createObjectURL(previewFile.file)}
-                      alt="Preview"
-                      className="file-preview-image"
-                    />
-                  )}
-                  {(previewFile.type === "pdf" ||
-                    previewFile.type === "epub") && (
-                    <div className="file-preview-icon">
-                      {previewFile.type === "pdf" ? "📄" : "📚"}
+                  ))}
+                  {typingUsers.size > 0 && (
+                    <div className="typing-indicator">
+                      {Array.from(typingUsers).map((userId) => (
+                        <span key={userId}>Someone is typing...</span>
+                      ))}
                     </div>
                   )}
-                  <div className="file-preview-info">
-                    <div className="file-preview-name">{previewFile.name}</div>
-                    <div className="file-preview-size">
-                      {formatFileSize(previewFile.size)}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+              {isBookClub && activeTab === "goals" && (
+                <GroupGoals conversationId={selectedConversation._id} />
+              )}
+              {previewFile && (
+                <div className="file-preview">
+                  <div className="file-preview-content">
+                    {previewFile.type === "image" && (
+                      <img
+                        src={URL.createObjectURL(previewFile.file)}
+                        alt="Preview"
+                        className="file-preview-image"
+                      />
+                    )}
+                    {(previewFile.type === "pdf" ||
+                      previewFile.type === "epub") && (
+                      <div className="file-preview-icon">
+                        {previewFile.type === "pdf" ? "📄" : "📚"}
+                      </div>
+                    )}
+                    <div className="file-preview-info">
+                      <div className="file-preview-name">
+                        {previewFile.name}
+                      </div>
+                      <div className="file-preview-size">
+                        {formatFileSize(previewFile.size)}
+                      </div>
                     </div>
                   </div>
+                  <div className="file-preview-actions">
+                    <button
+                      type="button"
+                      className="cancel-preview-btn"
+                      onClick={cancelPreview}
+                      disabled={uploading}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="upload-file-btn"
+                      onClick={handleFileUpload}
+                      disabled={uploading}
+                    >
+                      {uploading ? "Uploading..." : "Send File"}
+                    </button>
+                  </div>
                 </div>
-                <div className="file-preview-actions">
-                  <button
-                    type="button"
-                    className="cancel-preview-btn"
-                    onClick={cancelPreview}
-                    disabled={uploading}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="upload-file-btn"
-                    onClick={handleFileUpload}
-                    disabled={uploading}
-                  >
-                    {uploading ? "Uploading..." : "Send File"}
-                  </button>
-                </div>
-              </div>
-            )}
+              )}
 
-            <form className="message-input-form" onSubmit={handleSendMessage}>
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept="image/*,.pdf,.epub"
-                onChange={handleFileSelect}
-                style={{ display: "none" }}
-              />
-              <button
-                type="button"
-                className="file-upload-btn"
-                onClick={() => fileInputRef.current?.click()}
-                title="Upload file (Image, PDF, EPUB)"
-              >
-                📎
-              </button>
-              <input
-                type="text"
-                className="message-input"
-                placeholder="Type a message..."
-                value={messageText}
-                onChange={(e) => {
-                  setMessageText(e.target.value);
-                  handleTyping();
-                }}
-                disabled={uploading}
-              />
-              <button type="submit" className="send-btn" disabled={uploading}>
-                {uploading ? "..." : "Send"}
-              </button>
-            </form>
-          </>
-        ) : (
-          <div className="no-conversation">
-            <p>Select a conversation or friend to start chatting</p>
-          </div>
-        )}
-      </div>
+              <form className="message-input-form" onSubmit={handleSendMessage}>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept="image/*,.pdf,.epub"
+                  onChange={handleFileSelect}
+                  style={{ display: "none" }}
+                />
+                <button
+                  type="button"
+                  className="file-upload-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Upload file (Image, PDF, EPUB)"
+                >
+                  📎
+                </button>
+                <input
+                  type="text"
+                  className="message-input"
+                  placeholder="Type a message..."
+                  value={messageText}
+                  onChange={(e) => {
+                    setMessageText(e.target.value);
+                    handleTyping();
+                  }}
+                  disabled={uploading}
+                />
+                <button type="submit" className="send-btn" disabled={uploading}>
+                  {uploading ? "..." : "Send"}
+                </button>
+              </form>
+            </>
+          ) : (
+            <div className="no-conversation">
+              <p>Select a conversation or friend to start chatting</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {showGroupModal && (
         <div className="modal-overlay" onClick={() => setShowGroupModal(false)}>

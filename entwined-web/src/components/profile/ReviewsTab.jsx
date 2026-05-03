@@ -1,31 +1,54 @@
-export default function ReviewsTab({ reviews, reviewDraft, setReviewDraft, onCreateReview }) {
+export default function ReviewsTab({ reviews, reviewDraft, setReviewDraft, onCreateReview, isCurrentUser }) {
   return (
     <div className="profile-tab-panel">
-      <div className="review-create-card">
-        <input
-          placeholder="Book title"
-          value={reviewDraft.title}
-          onChange={(e) => setReviewDraft((prev) => ({ ...prev, title: e.target.value }))}
-        />
-        <textarea
-          placeholder="Write your review..."
-          value={reviewDraft.content}
-          onChange={(e) => setReviewDraft((prev) => ({ ...prev, content: e.target.value }))}
-        />
-        <div className="review-create-row">
-          <input
-            type="number"
-            min="1"
-            max="5"
-            value={reviewDraft.rating}
-            onChange={(e) => setReviewDraft((prev) => ({ ...prev, rating: e.target.value }))}
-          />
-          <button type="button" onClick={onCreateReview}>
-            Publish Review
-          </button>
-        </div>
-      </div>
+      
+      {isCurrentUser && (
+  <div className="review-create-card">
+    <input
+      placeholder="Book title"
+      value={reviewDraft.title}
+      onChange={(e) =>
+        setReviewDraft((prev) => ({
+          ...prev,
+          title: e.target.value,
+        }))
+      }
+    />
 
+    <textarea
+      placeholder="Write your review..."
+      value={reviewDraft.content}
+      onChange={(e) =>
+        setReviewDraft((prev) => ({
+          ...prev,
+          content: e.target.value,
+        }))
+      }
+    />
+
+    <div className="review-create-row">
+      <input
+        type="number"
+        min="1"
+        max="5"
+        value={reviewDraft.rating}
+        onChange={(e) =>
+          setReviewDraft((prev) => ({
+            ...prev,
+            rating: e.target.value,
+          }))
+        }
+      />
+
+      <button
+        type="button"
+        onClick={onCreateReview}
+      >
+        Publish Review
+      </button>
+    </div>
+  </div>
+)}
       {reviews.length === 0 ? (
         <p>No reviews yet.</p>
       ) : (

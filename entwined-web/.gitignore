@@ -26,3 +26,4 @@ firebaseKey.json
 entwined-server/firebaseKey.json
 .env
 node_modules
+.vercel

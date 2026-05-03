@@ -1,11 +1,11 @@
-/* --- Root Layout --- */
+
 .chat-container {
   display: flex;
   height: calc(100vh - 60px); /* Adjust based on your Navbar height */
-  background: #0a0a0a;
-  color: #e0e0e0;
+  background: #f0f4f8;
+  color: #0f172a;
   font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Oxygen, Ubuntu,
     Cantarell, sans-serif;
   overflow: hidden; /* Prevents whole-page scrolling */
 }
@@ -13,16 +13,16 @@
 /* --- Left Panel (Sidebar) --- */
 .chat-left-panel {
   width: 350px;
-  border-right: 1px solid #1f1f1f;
+  border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
-  background: #111111;
+  background: #ffffff;
   height: 100%;
 }
 
 .chat-header {
   padding: 20px;
-  border-bottom: 1px solid #1f1f1f;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -33,6 +33,7 @@
   margin: 0;
   font-size: 22px;
   font-weight: 600;
+  color: #0f172a;
 }
 
 .create-group-btn {
@@ -61,15 +62,15 @@
   padding: 15px 20px;
   cursor: pointer;
   transition: background 0.2s;
-  border-bottom: 1px solid #1a1a1a;
+  border-bottom: 1px solid #eef2f7;
 }
 
 .conversation-item:hover {
-  background: #1a1a1a;
+  background: #f1f5f9;
 }
 
 .conversation-item.active {
-  background: #1a1a1a;
+  background: #eff6ff;
   border-left: 4px solid #2563eb;
 }
 
@@ -82,11 +83,12 @@
 .conversation-name {
   font-weight: 500;
   font-size: 15px;
+  color: #0f172a;
 }
 
 .conversation-preview {
   font-size: 13px;
-  color: #888;
+  color: #64748b;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -94,17 +96,17 @@
 
 /* Scrollable Friends List at bottom of Sidebar */
 .friends-list {
-  border-top: 1px solid #1f1f1f;
+  border-top: 1px solid #e2e8f0;
   padding: 20px;
   max-height: 250px;
   overflow-y: auto;
-  background: #0d0d0d;
+  background: #f8fafc;
 }
 
 .friends-list h3 {
   margin: 0 0 12px 0;
   font-size: 12px;
-  color: #666;
+  color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -115,10 +117,11 @@
   border-radius: 6px;
   font-size: 14px;
   margin-bottom: 4px;
+  color: #1e293b;
 }
 
 .friend-item:hover {
-  background: #1a1a1a;
+  background: #eff6ff;
   color: #2563eb;
 }
 
@@ -127,7 +130,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: #0a0a0a;
+  background: #f0f4f8;
   height: 100%;
   position: relative;
   min-width: 0; /* Important for flex-child text truncation */
@@ -135,11 +138,11 @@
 
 .chat-header-bar {
   padding: 15px 20px;
-  border-bottom: 1px solid #1f1f1f;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #111111;
+  background: #ffffff;
   flex-shrink: 0;
 }
 
@@ -147,13 +150,14 @@
   margin: 0;
   font-size: 18px;
   font-weight: 600;
+  color: #0f172a;
 }
 
 /* Book Club Tabs Styling */
 .chat-tabs {
   display: flex;
   gap: 4px;
-  background: #1a1a1a;
+  background: #f1f5f9;
   padding: 4px;
   border-radius: 8px;
 }
@@ -163,7 +167,7 @@
   border-radius: 6px;
   border: none;
   background: transparent;
-  color: #888;
+  color: #64748b;
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
@@ -221,8 +225,9 @@
 
 .message.received {
   align-self: flex-start;
-  background: #1f1f1f;
-  color: #e0e0e0;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
   border-bottom-left-radius: 2px;
 }
 
@@ -250,25 +255,25 @@
   align-items: center;
   gap: 12px;
   padding: 10px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(15, 23, 42, 0.04);
   border-radius: 10px;
   cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .shared-post-preview {
   margin-top: 8px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(15, 23, 42, 0.12);
   overflow: hidden;
-  background: rgba(0, 0, 0, 0.18);
+  background: rgba(15, 23, 42, 0.03);
 }
 
 .shared-post-header {
   font-size: 12px;
   font-weight: 600;
   padding: 8px 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .shared-post-image {
@@ -305,21 +310,21 @@
 /* --- Input Area --- */
 .message-input-form {
   padding: 15px 20px;
-  background: #111111;
+  background: #ffffff;
   display: flex;
   align-items: center;
   gap: 12px;
-  border-top: 1px solid #1f1f1f;
+  border-top: 1px solid #e2e8f0;
   flex-shrink: 0;
 }
 
 .message-input {
   flex: 1;
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
   border-radius: 20px;
   padding: 10px 18px;
-  color: white;
+  color: #0f172a;
   outline: none;
 }
 
@@ -352,7 +357,7 @@
 /* --- File Upload Preview Bar --- */
 .file-preview {
   padding: 12px 20px;
-  background: #1a1a1a;
+  background: #eff6ff;
   border-top: 1px solid #2563eb;
   display: flex;
   flex-direction: column;
@@ -380,8 +385,8 @@
 }
 
 .cancel-preview-btn {
-  background: #333;
-  color: white;
+  background: #e2e8f0;
+  color: #0f172a;
   border: none;
   padding: 6px 12px;
   border-radius: 6px;
@@ -400,7 +405,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(15, 23, 42, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -408,21 +413,23 @@
 }
 
 .modal-content {
-  background: #181818;
+  background: #ffffff;
   padding: 25px;
   border-radius: 12px;
   width: 90%;
   max-width: 450px;
-  border: 1px solid #333;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
+  color: #0f172a;
 }
 
 .modal-input {
   width: 100%;
   padding: 12px;
-  background: #0a0a0a;
-  border: 1px solid #333;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  color: white;
+  color: #0f172a;
   margin: 15px 0;
 }
 
@@ -460,12 +467,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #666;
+  color: #94a3b8;
 }
 
 .typing-indicator {
   font-size: 12px;
-  color: #888;
+  color: #64748b;
   font-style: italic;
   margin-top: 5px;
 }
@@ -478,31 +485,116 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2a2a2a;
+  background: #cbd5e1;
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #333;
+  background: #94a3b8;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
+
+  .chat-container {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* Full width mobile screens */
+  .chat-left-panel,
+  .chat-right-panel {
+    width: 100%;
+    min-width: 100%;
+    border: none;
+  }
+
+  /* Sidebar */
   .chat-left-panel {
-    width: 80px;
+    background: white;
   }
-  .chat-header h2,
-  .conversation-preview,
-  .conversation-name,
+
+  .chat-header {
+    padding: 18px 16px;
+  }
+
+  .chat-header h2 {
+    display: block;
+    font-size: 1.3rem;
+  }
+
+  .conversation-item {
+    padding: 16px;
+  }
+
+  .conversation-name {
+    font-size: 15px;
+  }
+
+  .conversation-preview {
+    display: block;
+  }
+
   .friends-list {
-    display: none;
+    display: block;
   }
-  .create-group-btn {
-    padding: 8px;
-    font-size: 0;
+
+  /* Chat Header */
+  .chat-header-bar {
+    padding: 14px 16px;
+    gap: 10px;
   }
-  .create-group-btn::before {
-    content: "+";
-    font-size: 20px;
+
+  .mobile-back-btn {
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    cursor: pointer;
+    color: #0f172a;
+  }
+
+  /* Messages */
+  .messages-container {
+    padding: 14px 12px;
+  }
+
+  .message {
+    max-width: 82%;
+    font-size: 14px;
+    padding: 10px 13px;
+  }
+
+  /* Input */
+  .message-input-form {
+    padding:
+      10px 12px
+      calc(10px + env(safe-area-inset-bottom));
+
+    gap: 8px;
+
+    position: sticky;
+    bottom: 0;
+
+    background: white;
+  }
+
+  .message-input {
+    min-height: 44px;
+    font-size: 15px;
+  }
+
+  .send-btn {
+    padding: 10px 14px;
+    border-radius: 14px;
+  }
+
+  .file-upload-btn {
+    font-size: 18px;
+  }
+
+  /* Modal */
+  .modal-content {
+    width: 94%;
+    padding: 20px;
+    border-radius: 18px;
   }
 }
 /* This targets the container holding either messages OR GroupGoals */
