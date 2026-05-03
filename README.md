@@ -240,12 +240,21 @@ Deploy using:
 
 ## Future Improvements
 
-* AI-powered book recommendations
-* Reading analytics dashboard
-* Voice rooms for discussions
-* Notification system
-* Book clubs and communities
-* Advanced search and filters
+- Improve responsiveness and mobile UI consistency across all pages and components
+- Eliminate horizontal overflow issues on smaller screen devices
+- Enhance chat UI and dashboard layouts for better mobile experience
+- Make shared posts clickable and navigable to the original post
+- Make usernames and profile images clickable throughout the platform
+- Add direct profile navigation from posts, comments, chats, and friend lists
+- Enable local device upload for profile pictures instead of URL-only uploads
+- Add image preview support before profile upload
+- Implement real-time unread message notifications
+- Add notification badges and live message indicators using Socket.IO
+- Improve overall UI polish and interaction feedback
+- Add browser push notifications for messages and friend activity
+- Introduce advanced search and filtering for users and books
+- Add AI-powered book recommendations and reading insights
+- Improve accessibility and performance optimization
 
 ---
 
