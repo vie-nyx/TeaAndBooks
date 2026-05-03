@@ -105,10 +105,35 @@ const moveBook = async (req, res) => {
     return res.status(500).json({ message: err.message || "Failed to move book" });
   }
 };
+const getUserLibrary = async (req, res) => {
+  try {
+    const library = await Library.findOne({
+      user: req.params.userId,
+    });
 
+    if (!library) {
+      return res.json({
+        library: {
+          read: [],
+          currentlyReading: [],
+          wantToRead: [],
+        },
+      });
+    }
+
+    return res.json({ library });
+  } catch (err) {
+    return res.status(500).json({
+      message:
+        err.message ||
+        "Failed to fetch library",
+    });
+  }
+};
 module.exports = {
   getMyLibrary,
   addBook,
   removeBook,
   moveBook,
+  getUserLibrary,
 };

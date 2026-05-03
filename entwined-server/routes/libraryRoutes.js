@@ -8,5 +8,5 @@ router.get("/me", auth, libraryController.getMyLibrary);
 router.post("/book", auth, libraryController.addBook);
 router.delete("/book/:shelf/:bookEntryId", auth, libraryController.removeBook);
 router.patch("/move", auth, libraryController.moveBook);
-
+router.get("/:userId", auth, libraryController.getUserLibrary);
 module.exports = router;
