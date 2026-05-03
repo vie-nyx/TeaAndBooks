@@ -20,7 +20,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Routes>
           <Route path="/" element={<Auth />} />
           <Route
-            path="/dashboard"
+            path="/dashboard/*"
             element={
               <ProtectedRoute>
                 <SocketProvider>
@@ -29,16 +29,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               </ProtectedRoute>
             }
           />
-          <Route
-    path="/profile/:id?" // The ? makes the ID optional
-    element={
-      <ProtectedRoute>
-        <SocketProvider>
-          <Dashboard />
-        </SocketProvider>
-      </ProtectedRoute>
-    }
-  />
           <Route path="/verify-email/:token" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />

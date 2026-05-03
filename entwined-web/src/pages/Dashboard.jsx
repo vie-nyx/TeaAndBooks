@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import api from "../api/api";
 import "../styles/Dashboard.css";
 
@@ -11,7 +11,10 @@ import ProfileDashboard from "../components/profile/ProfileDashboard";
 export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { id } = useParams();
+  const profileId =
+  location.pathname.split(
+    "/dashboard/profile/"
+  )[1];
 
   const [activeTab, setActiveTab] = useState(
     location.pathname.includes(
@@ -171,8 +174,9 @@ export default function Dashboard() {
 ) && (
   <div className="feed-layout">
     <ProfileDashboard
-      key={id || "own-profile"}
-    />
+  key={profileId || "own-profile"}
+  userId={profileId}
+/>
   </div>
 )}
 

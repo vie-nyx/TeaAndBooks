@@ -8,7 +8,6 @@ import ReviewsTab from "./ReviewsTab";
 import ActivityTab from "./ActivityTab";
 import ClubsTab from "./ClubsTab";
 import JournalPanel from "./JournalPanel";
-import { useParams } from "react-router-dom";
 
 const tabs = [
   "posts",
@@ -19,7 +18,9 @@ const tabs = [
   "journal",
 ];
 
-export default function ProfileDashboard() {
+export default function ProfileDashboard({
+  userId: propUserId,
+}) {
   const { user, verifyAndFetchUser } = useAuth();
 
   const [activeTab, setActiveTab] = useState("posts");
@@ -78,25 +79,20 @@ export default function ProfileDashboard() {
     isPublic: false,
   });
 
-  const { id } = useParams();
 
-const resolvedRouteId =
-  id === "me"
+  const finalUserId =
+  propUserId === "me"
     ? user?._id
-    : id;
-
-const userId =
-  resolvedRouteId || user?._id;
-
+    : propUserId || user?._id;
   const loadData = useCallback(async () => {
-    if (!userId) return;
+    if (!finalUserId) return;
 
     setLoading(true);
     setError("");
 
     try {
       const profileRes = await api.get(
-        `/api/profile/${userId}`
+        `/api/profile/${finalUserId}`
       );
 
       console.log("[ProfileDashboard] profile response:", profileRes.data);
@@ -106,9 +102,9 @@ const userId =
       setIsFollowing(profileRes.data.isFollowing);
 
       const [contentRes, libraryRes, journalRes] = await Promise.all([
-        api.get(`/api/profile/${userId}/content`),
-        api.get(`/api/library/${userId}`),
-        api.get(`/api/journal/${userId}`),
+        api.get(`/api/profile/${finalUserId}/content`),
+        api.get(`/api/library/${finalUserId}`),
+        api.get(`/api/journal/${finalUserId}`),
       ]);
 
       setContent(contentRes.data);
@@ -132,17 +128,17 @@ const userId =
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [finalUserId]);
 
   useEffect(() => {
-    if (!userId) return undefined;
+    if (!finalUserId) return undefined;
 
     const timer = setTimeout(() => {
       loadData();
     }, 0);
 
     return () => clearTimeout(timer);
-  }, [userId, loadData]);
+  }, [finalUserId, loadData]);
 
   const readingStats = useMemo(
     () => profile?.readingStats || {},
@@ -297,7 +293,7 @@ const userId =
       });
 
       const contentRes = await api.get(
-        `/api/profile/${userId}/content`
+        `/api/profile/${finalUserId}/content`
       );
 
       setContent(contentRes.data);
@@ -325,7 +321,7 @@ const userId =
         isPublic: entryDraft.isPublic,
       });
 
-      const journalRes = await api.get(`/api/journal/${userId}`);
+      const journalRes = await api.get(`/api/journal/${finalUserId}`);
 
       setEntries(journalRes.data || []);
 
