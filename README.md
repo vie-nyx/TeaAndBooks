@@ -294,21 +294,7 @@ Mannat Berry
 * GitHub: [https://github.com/vie-nyx](https://github.com/vie-nyx)
 * LinkedIn: [https://linkedin.com/in/mannat-berry-416878266](https://linkedin.com/in/mannat-berry-416878266)
 
----
 
-## Screenshots
-
-Add screenshots of:
-
-* Home Feed
-* User Profile
-* Chat Interface
-* Reading Dashboard
-* Group Goals
-* Library Section
-* Mobile Responsive Layout
-
-GitHub repositories with screenshots usually look much more professional and trustworthy.
 
 ---
 
