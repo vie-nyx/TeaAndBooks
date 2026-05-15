@@ -80,23 +80,122 @@ For reference while testing friend-related features, search for users like:
 ## Folder Structure
 
 ```bash
-entwined/
-│
-├── client/
-│   ├── src/
-│   ├── public/
-│   └── package.json
-│
-├── server/
-│   ├── config/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   ├── socket/
-│   ├── uploads/
-│   └── server.js
-│
-└── README.md
+TeaAndBooks/
+|-- .gitignore
+|-- AUTH_AND_FILE_SHARING.md
+|-- CHAT_IMPLEMENTATION.md
+|-- LICENSE
+|-- README.md
+|-- entwined-server/
+|   |-- config/
+|   |   |-- cloudinary.js
+|   |   `-- firebase.js
+|   |-- controllers/
+|   |   |-- authController.js
+|   |   |-- chatController.js
+|   |   |-- groupGoalController.js
+|   |   |-- journalController.js
+|   |   |-- libraryController.js
+|   |   `-- profileController.js
+|   |-- middleware/
+|   |   |-- authMiddleware.js
+|   |   |-- authRelaxed.js
+|   |   `-- upload.js
+|   |-- models/
+|   |   |-- Comments.js
+|   |   |-- Conversation.js
+|   |   |-- FriendRequest.js
+|   |   |-- Friendship.js
+|   |   |-- GroupGoal.js
+|   |   |-- JournalEntry.js
+|   |   |-- Library.js
+|   |   |-- Message.js
+|   |   |-- Post.js
+|   |   |-- PostLike.js
+|   |   |-- Review.js
+|   |   |-- SharedPost.js
+|   |   `-- User.js
+|   |-- routes/
+|   |   |-- authRoutes.js
+|   |   |-- chatRoutes.js
+|   |   |-- friendRoutes.js
+|   |   |-- groupGoalRoutes.js
+|   |   |-- journalRoutes.js
+|   |   |-- libraryRoutes.js
+|   |   |-- posts.js
+|   |   |-- profileRoutes.js
+|   |   |-- reviewRoutes.js
+|   |   `-- userRoutes.js
+|   |-- socket/
+|   |   `-- socketHandler.js
+|   |-- uploads/
+|   |   |-- files/
+|   |   |   `-- 1772374738526-798426952.pdf
+|   |   `-- images/
+|   |       |-- 1772373650635-452013487.jpeg
+|   |       `-- 1772374731614-594931719.jpeg
+|   |-- utils/
+|   |   |-- readingStats.js
+|   |   `-- sendEmail.js
+|   |-- package-lock.json
+|   |-- package.json
+|   `-- server.js
+`-- entwined-web/
+    |-- public/
+    |   `-- vite.svg
+    |-- src/
+    |   |-- api/
+    |   |   `-- api.js
+    |   |-- assets/
+    |   |   `-- react.svg
+    |   |-- components/
+    |   |   |-- group/
+    |   |   |   |-- ActiveGoalBanner.jsx
+    |   |   |   |-- AdminPanel.jsx
+    |   |   |   |-- CreateGroupModal.jsx
+    |   |   |   |-- GroupGoals.jsx
+    |   |   |   `-- GroupTabs.jsx
+    |   |   |-- profile/
+    |   |   |   |-- ActivityTab.jsx
+    |   |   |   |-- ClubsTab.jsx
+    |   |   |   |-- JournalPanel.jsx
+    |   |   |   |-- LibraryTab.jsx
+    |   |   |   |-- ProfileDashboard.jsx
+    |   |   |   |-- ProfileHeader.jsx
+    |   |   |   `-- ReviewsTab.jsx
+    |   |   |-- Chat.jsx
+    |   |   |-- CommentInput.jsx
+    |   |   |-- CommentSection.jsx
+    |   |   |-- CreatePost.jsx
+    |   |   |-- PostCard.jsx
+    |   |   |-- PostFeed.jsx
+    |   |   `-- ProtectedRoute.jsx
+    |   |-- contexts/
+    |   |   |-- AuthContext.jsx
+    |   |   `-- SocketContext.jsx
+    |   |-- pages/
+    |   |   |-- Auth.jsx
+    |   |   |-- Dashboard.jsx
+    |   |   |-- ForgotPassword.jsx
+    |   |   |-- ResetPassword.jsx
+    |   |   `-- VerifyEmail.jsx
+    |   |-- styles/
+    |   |   |-- Auth.css
+    |   |   |-- Chat.css
+    |   |   |-- Dashboard.css
+    |   |   `-- GroupGoals.css
+    |   |-- App.css
+    |   |-- App.jsx
+    |   |-- firebase.ts
+    |   |-- index.css
+    |   `-- main.jsx
+    |-- README.md
+    |-- eslint.config.js
+    |-- index.html
+    |-- package-lock.json
+    |-- package.json
+    |-- vercel.json
+    `-- vite.config.js
 ```
 
 ---
