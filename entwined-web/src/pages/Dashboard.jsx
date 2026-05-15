@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import api from "../api/api";
 import "../styles/Dashboard.css";
 
@@ -194,7 +194,9 @@ export default function Dashboard() {
                 {results.length > 0 ? (
                   results.map((user) => (
                     <div key={user._id} className="user-result">
-                      <span>{user.username}</span>
+                      <Link to={`/profile/${user._id}`} className="profile-link">
+                        {user.username}
+                      </Link>
                       <button onClick={() => sendRequest(user.username)}>Add</button>
                     </div>
                   ))
@@ -208,7 +210,12 @@ export default function Dashboard() {
                 {incoming.length > 0 ? (
                   incoming.map((req) => (
                     <div key={req._id} className="user-result">
-                      <span>{req.sender.username}</span>
+                      <Link
+                        to={`/profile/${req.sender._id}`}
+                        className="profile-link"
+                      >
+                        {req.sender.username}
+                      </Link>
                       <button onClick={() => acceptRequest(req._id)}>Accept</button>
                     </div>
                   ))
@@ -222,17 +229,13 @@ export default function Dashboard() {
               <h2>Friends</h2>
               {friends.length > 0 ? (
                 friends.map((friend) => (
-                  <div
+                  <Link
                     key={friend._id}
-                    className="user-result clickable-user"
-                    onClick={() =>
-                      navigate(
-                        `/dashboard/profile/${friend._id}`
-                      )
-                    }
+                    className="user-result clickable-user profile-link"
+                    to={`/profile/${friend._id}`}
                   >
                     <span>{friend.username}</span>
-                  </div>
+                  </Link>
                 ))
               ) : (
                 <p className="empty-state">Your reading circle is empty.</p>

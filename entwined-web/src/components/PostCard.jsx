@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import api from "../api/api";
 import CommentSection from "./CommentSection";
 import CommentInput from "./CommentInput";
@@ -93,18 +94,35 @@ export default function PostCard({ post, onUpdated }) {
   const { user, imageUrl, caption } = optimisticPost;
   const username = user?.username || "Reader";
   const profileImage = user?.profileImage;
+  const profilePath = user?._id ? `/profile/${user._id}` : null;
 
   return (
     <article className="post-card">
       <header className="post-header">
-        <div className="post-user-avatar">
-          {profileImage ? (
-            <img src={profileImage} alt={`${username} profile`} />
-          ) : (
-            username.charAt(0).toUpperCase()
-          )}
-        </div>
-        <div className="post-username">@{username}</div>
+        {profilePath ? (
+          <Link to={profilePath} className="post-user-avatar profile-link">
+            {profileImage ? (
+              <img src={profileImage} alt={`${username} profile`} />
+            ) : (
+              username.charAt(0).toUpperCase()
+            )}
+          </Link>
+        ) : (
+          <div className="post-user-avatar">
+            {profileImage ? (
+              <img src={profileImage} alt={`${username} profile`} />
+            ) : (
+              username.charAt(0).toUpperCase()
+            )}
+          </div>
+        )}
+        {profilePath ? (
+          <Link to={profilePath} className="post-username profile-link">
+            @{username}
+          </Link>
+        ) : (
+          <div className="post-username">@{username}</div>
+        )}
       </header>
 
       <div className="post-image-wrapper">
