@@ -118,7 +118,10 @@ export default function Auth() {
 
       setError(message);
 
-      if (message.toLowerCase().includes("verify")) {
+      // Show alert for account not found
+      if (message.toLowerCase().includes("not found")) {
+        alert("Account not found. Please sign up to create a new account.");
+      } else if (message.toLowerCase().includes("verify")) {
         setShowResend(true);
       }
 
