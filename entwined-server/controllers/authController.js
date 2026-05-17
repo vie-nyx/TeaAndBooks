@@ -47,6 +47,8 @@ const signup = async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      profileImage: `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=1f2937&color=ffffff`,
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=1f2937&color=ffffff`,
       emailVerificationToken: hashedToken,
       emailVerificationExpire: Date.now() + 24 * 60 * 60 * 1000
     });
@@ -280,6 +282,8 @@ const googleLogin = async (req, res) => {
         username: name,
         email,
         password: null,
+        profileImage: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1f2937&color=ffffff`,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1f2937&color=ffffff`,
         isVerified: true
       });
     }
