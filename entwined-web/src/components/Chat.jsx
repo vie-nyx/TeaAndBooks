@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import api from "../api/api";
 import { useSocket } from "../contexts/SocketContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -378,6 +379,8 @@ export default function Chat() {
     return user?._id;
   };
 
+  const getProfilePath = (userId) => (userId ? `/profile/${userId}` : null);
+
   const isBookClub = selectedConversation?.groupType === "bookclub";
   console.log("Selected Conversation:", selectedConversation);
   return (
@@ -438,7 +441,17 @@ export default function Chat() {
                 className="friend-item"
                 onClick={() => handleFriendClick(friend)}
               >
-                {friend.username}
+                {getProfilePath(friend._id) ? (
+                  <Link
+                    to={getProfilePath(friend._id)}
+                    className="profile-link"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {friend.username}
+                  </Link>
+                ) : (
+                  <span>{friend.username}</span>
+                )}
               </div>
             ))}
           </div>
@@ -543,7 +556,16 @@ export default function Chat() {
                         <div className="shared-post-preview">
                           <div className="shared-post-header">
                             Shared post by @
-                            {message.postId.user?.username || "Reader"}
+                            {getProfilePath(message.postId.user?._id) ? (
+                              <Link
+                                to={getProfilePath(message.postId.user?._id)}
+                                className="profile-link"
+                              >
+                                {message.postId.user?.username || "Reader"}
+                              </Link>
+                            ) : (
+                              <span>{message.postId.user?.username || "Reader"}</span>
+                            )}
                           </div>
                           {message.postId.imageUrl && (
                             <img

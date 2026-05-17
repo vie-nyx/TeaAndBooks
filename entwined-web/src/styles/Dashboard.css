@@ -11,6 +11,16 @@
   flex-direction: column;
 }
 
+.profile-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.profile-link:hover {
+  color: #2563eb;
+}
+
 .dashboard-tabs {
   display: flex;
   gap: 0;
