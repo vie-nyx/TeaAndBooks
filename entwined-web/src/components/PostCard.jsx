@@ -3,6 +3,7 @@ import api from "../api/api";
 import CommentSection from "./CommentSection";
 import CommentInput from "./CommentInput";
 import { useAuth } from "../contexts/AuthContext";
+import { getPostCategoryLabel } from "../constants/postCategories";
 
 export default function PostCard({ post, onUpdated }) {
   const [optimisticPost, setOptimisticPost] = useState(post);
@@ -22,9 +23,19 @@ export default function PostCard({ post, onUpdated }) {
   const userHasLiked = useMemo(() => {
     if (!currentUser?._id || !optimisticPost?.likes) return false;
     return optimisticPost.likes.some(
-      (likeUserId) => likeUserId?.toString() === currentUser._id.toString(),
+      (likeUserId) => likeUserId?.toString() === currentUser._id.toString()
     );
   }, [currentUser?._id, optimisticPost?.likes]);
+
+  const formattedDate = useMemo(() => {
+    if (!optimisticPost?.createdAt) return "";
+
+    return new Intl.DateTimeFormat("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    }).format(new Date(optimisticPost.createdAt));
+  }, [optimisticPost?.createdAt]);
 
   const handleLike = async () => {
     if (liking) return;
@@ -64,7 +75,8 @@ export default function PostCard({ post, onUpdated }) {
   const getConversationName = (conversation) => {
     if (conversation.type === "group") return conversation.groupName;
     const other = (conversation.participants || []).find(
-      (participant) => participant?._id?.toString() !== currentUser?._id?.toString(),
+      (participant) =>
+        participant?._id?.toString() !== currentUser?._id?.toString()
     );
     return other?.username || "Conversation";
   };
@@ -90,7 +102,7 @@ export default function PostCard({ post, onUpdated }) {
     }
   };
 
-  const { user, imageUrl, caption } = optimisticPost;
+  const { user, imageUrl, caption, category } = optimisticPost;
   const username = user?.username || "Reader";
   const profileImage = user?.profileImage;
 
@@ -104,7 +116,15 @@ export default function PostCard({ post, onUpdated }) {
             username.charAt(0).toUpperCase()
           )}
         </div>
-        <div className="post-username">@{username}</div>
+        <div className="post-header-copy">
+          <div className="post-username">@{username}</div>
+          <div className="post-meta-row">
+            <span className="post-category-badge">
+              {getPostCategoryLabel(category)}
+            </span>
+            {formattedDate && <span className="post-date">{formattedDate}</span>}
+          </div>
+        </div>
       </header>
 
       <div className="post-image-wrapper">
@@ -122,7 +142,7 @@ export default function PostCard({ post, onUpdated }) {
             disabled={liking}
           >
             <span>♥</span>
-            <span>{liking ? "…" : "Like"}</span>
+            <span>{liking ? "..." : "Like"}</span>
           </button>
           <span className="likes-count">
             {(optimisticPost.likes || []).length} likes
@@ -149,15 +169,15 @@ export default function PostCard({ post, onUpdated }) {
             <CommentInput
               postId={optimisticPost._id}
               onNewComment={(comment) => {
-                setOptimisticPost((prev) => ({
-                  ...prev,
-                  comments: [...(prev.comments || []), comment],
-                }));
+                const updatedPost = {
+                  ...optimisticPost,
+                  comments: [...(optimisticPost.comments || []), comment]
+                };
+
+                setOptimisticPost(updatedPost);
+
                 if (onUpdated) {
-                  onUpdated({
-                    ...optimisticPost,
-                    comments: [...(optimisticPost.comments || []), comment],
-                  });
+                  onUpdated(updatedPost);
                 }
               }}
             />
@@ -199,5 +219,3 @@ export default function PostCard({ post, onUpdated }) {
     </article>
   );
 }
-
-
