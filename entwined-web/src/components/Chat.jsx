@@ -38,6 +38,7 @@ export default function Chat() {
     if (selectedConversation) {
       fetchMessages(selectedConversation._id);
       joinConversation(selectedConversation._id);
+      markAsRead(selectedConversation._id);
     }
 
     return () => {
@@ -58,6 +59,7 @@ export default function Chat() {
     socket.on("typing:stop", handleTypingStop);
     socket.on("user:online", handleUserOnline);
     socket.on("user:offline", handleUserOffline);
+    socket.on("conversation:read_updated", handleReadUpdated);
 
     return () => {
       socket.off("message:new");
@@ -66,6 +68,7 @@ export default function Chat() {
       socket.off("typing:stop");
       socket.off("user:online");
       socket.off("user:offline");
+      socket.off("conversation:read_updated");
     };
   }, [socket, selectedConversation]);
 
@@ -77,9 +80,32 @@ export default function Chat() {
     try {
       const res = await api.get("/api/chat/conversations");
       setConversations(res.data);
+      window.dispatchEvent(new Event("chat:unread_updated"));
     } catch (err) {
       console.error("Error fetching conversations:", err);
     }
+  };
+
+  const markAsRead = async (conversationId) => {
+    try {
+      await api.post(`/api/chat/conversation/${conversationId}/read`);
+      if (socket) {
+        socket.emit("conversation:mark_read", { conversationId });
+      }
+      setConversations((prev) =>
+        prev.map((c) => (c._id === conversationId ? { ...c, unreadCount: 0 } : c))
+      );
+      window.dispatchEvent(new Event("chat:unread_updated"));
+    } catch (err) {
+      console.error("Error marking conversation as read:", err);
+    }
+  };
+
+  const handleReadUpdated = ({ conversationId, unreadCount }) => {
+    setConversations((prev) =>
+      prev.map((c) => (c._id === conversationId ? { ...c, unreadCount } : c))
+    );
+    window.dispatchEvent(new Event("chat:unread_updated"));
   };
 
   const fetchFriends = async () => {
@@ -119,6 +145,9 @@ export default function Chat() {
       message.conversationId === selectedConversation._id
     ) {
       setMessages((prev) => [...prev, message]);
+      if (message.sender._id?.toString() !== getCurrentUserId()?.toString()) {
+        markAsRead(selectedConversation._id);
+      }
     }
     fetchConversations(); // Update conversation list
   };
@@ -400,7 +429,7 @@ export default function Chat() {
                 key={conv._id}
                 className={`conversation-item ${
                   selectedConversation?._id === conv._id ? "active" : ""
-                }`}
+                } ${conv.unreadCount > 0 ? "unread" : ""}`}
                 onClick={() => {
                   setSelectedConversation(conv);
 
@@ -410,8 +439,11 @@ export default function Chat() {
                 }}
               >
                 <div className="conversation-info">
-                  <div className="conversation-name">
-                    {getConversationName(conv)}
+                  <div className="conversation-header-row">
+                    <span className="conversation-name">{getConversationName(conv)}</span>
+                    {conv.unreadCount > 0 && (
+                      <span className="unread-badge">{conv.unreadCount}</span>
+                    )}
                   </div>
                   {conv.lastMessage && (
                     <div className="conversation-preview">

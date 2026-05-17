@@ -1,6 +1,10 @@
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../config/cloudinary");
+const path = require("path");
+const fs = require("fs");
+
+const useCloudinary = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_CLOUD_NAME !== "demo";
 
 /*
 =================================
@@ -8,13 +12,28 @@ POST IMAGE UPLOAD (for posts)
 =================================
 */
 
-const postStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: "entwined/posts",
-    allowed_formats: ["jpg", "jpeg", "png", "webp"]
-  }
-});
+let postStorage;
+
+if (useCloudinary) {
+  postStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+      folder: "entwined/posts",
+      allowed_formats: ["jpg", "jpeg", "png", "webp"]
+    }
+  });
+} else {
+  postStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      const dir = path.join(__dirname, "../uploads/posts");
+      fs.mkdirSync(dir, { recursive: true });
+      cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + "-" + file.originalname.replace(/\s+/g, "-"));
+    }
+  });
+}
 
 const uploadImage = multer({
   storage: postStorage,
@@ -27,33 +46,50 @@ CHAT FILE UPLOAD (images + pdf + epub)
 =================================
 */
 
-const chatStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: async (req, file) => {
-    const ext = file.originalname.split(".").pop().toLowerCase();
+let chatStorage;
 
-    let folder = "entwined/chat/files";
-    let resource_type = "raw";
+if (useCloudinary) {
+  chatStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: async (req, file) => {
+      const ext = file.originalname.split(".").pop().toLowerCase();
 
-    // Images
-    if (["jpg", "jpeg", "png", "webp", "gif"].includes(ext)) {
-      folder = "entwined/chat/images";
-      resource_type = "image";
+      let folder = "entwined/chat/files";
+      let resource_type = "raw";
+
+      // Images
+      if (["jpg", "jpeg", "png", "webp", "gif"].includes(ext)) {
+        folder = "entwined/chat/images";
+        resource_type = "image";
+      }
+
+      // PDFs & EPUBs
+      if (["pdf", "epub"].includes(ext)) {
+        folder = "entwined/chat/files";
+        resource_type = "raw";
+      }
+
+      return {
+        folder,
+        resource_type,
+        public_id: Date.now() + "-" + file.originalname.replace(/\s+/g, "-")
+      };
     }
-
-    // PDFs & EPUBs
-    if (["pdf", "epub"].includes(ext)) {
-      folder = "entwined/chat/files";
-      resource_type = "raw";
+  });
+} else {
+  chatStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      const isImage = /\.(jpeg|jpg|png|gif|webp)$/i.test(ext);
+      const dir = path.join(__dirname, "../uploads", isImage ? "images" : "files");
+      fs.mkdirSync(dir, { recursive: true });
+      cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + "-" + file.originalname.replace(/\s+/g, "-"));
     }
-
-    return {
-      folder,
-      resource_type,
-      public_id: Date.now() + "-" + file.originalname.replace(/\s+/g, "-")
-    };
-  }
-});
+  });
+}
 
 const uploadFile = multer({
   storage: chatStorage,

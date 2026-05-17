@@ -41,6 +41,20 @@
   border-bottom-color: #2563eb;
 }
 
+.notification-badge {
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: 8px;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+  animation: pulseBadge 2s infinite;
+  vertical-align: middle;
+  display: inline-block;
+}
+
 .dashboard-card {
   width: 100%;
   max-width: 600px;

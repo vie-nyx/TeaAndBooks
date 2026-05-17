@@ -271,6 +271,22 @@ export default function Auth() {
               {loading ? "Logging in..." : "Login"}
             </button>
 
+            <button
+              className="auth-button demo-btn"
+              onClick={() => {
+                setEmail("demo@entwined.com");
+                setPassword("demo123");
+                setTimeout(() => {
+                  const loginBtn = document.querySelector(".auth-button");
+                  if (loginBtn) loginBtn.click();
+                }, 100);
+              }}
+              disabled={loading}
+              style={{ marginTop: '10px', background: 'linear-gradient(135deg, #10b981, #059669)' }}
+            >
+              {loading ? "Logging in..." : "Demo Login (Auto)"}
+            </button>
+
             {showResend && (
               <button
                 className="resend-button"

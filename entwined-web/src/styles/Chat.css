@@ -61,8 +61,9 @@
 .conversation-item {
   padding: 15px 20px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
   border-bottom: 1px solid #eef2f7;
+  position: relative;
 }
 
 .conversation-item:hover {
@@ -74,14 +75,56 @@
   border-left: 4px solid #2563eb;
 }
 
+.conversation-item.unread {
+  background: #fef2f2;
+  border-left: 4px solid #ef4444;
+}
+
+.conversation-item.unread:hover {
+  background: #fee2e2;
+}
+
+.conversation-item.unread.active {
+  background: #eff6ff;
+  border-left: 4px solid #2563eb;
+}
+
 .conversation-info {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
+.conversation-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.unread-badge {
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+  animation: pulseBadge 2s infinite;
+  display: inline-block;
+}
+
+@keyframes pulseBadge {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
 .conversation-name {
-  font-weight: 500;
+  font-weight: 600;
   font-size: 15px;
   color: #0f172a;
 }

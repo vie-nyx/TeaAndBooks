@@ -39,10 +39,13 @@ router.post("/create", auth, uploadImage.single("image"), async (req, res) => {
       return res.status(400).json({ error: "Image is required" });
     }
 
-    // Cloudinary automatically uploads the file
-    const imageUrl = req.file.path;
+    // Cloudinary or local disk storage
+    let imageUrl = req.file.path;
+    if (!imageUrl.startsWith("http")) {
+      imageUrl = "/uploads/posts/" + req.file.filename;
+    }
 
-    console.log("Cloudinary image URL:", imageUrl);
+    console.log("Image URL:", imageUrl);
 
     const post = await Post.create({
       user: req.userId,

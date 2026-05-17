@@ -80,13 +80,24 @@ app.set("trust proxy", 1);
 
 /*
 ========================
-SOCKET.IO
+SOCKET.IO & CORS CONFIG
 ========================
 */
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
+  "http://localhost:5176",
+  "http://localhost:5177",
+  "http://localhost:5178",
+  "http://localhost:3000",
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   },
@@ -134,7 +145,7 @@ CORS
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -150,6 +161,15 @@ BODY PARSER
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+/*
+========================
+STATIC FILES (UPLOADS)
+========================
+*/
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/api/chat/uploads", express.static(path.join(__dirname, "uploads")));
 
 /*
 ========================
@@ -355,10 +375,10 @@ app.post(
         const isImage = /\.(jpeg|jpg|png|gif|webp)$/i.test(ext);
 
         if (isImage) {
-          imageUrl = req.file.path;
+          imageUrl = req.file.path.startsWith("http") ? req.file.path : "/uploads/images/" + req.file.filename;
           fileType = "image";
         } else if (ext === ".pdf" || ext === ".epub") {
-          fileUrl = req.file.path;
+          fileUrl = req.file.path.startsWith("http") ? req.file.path : "/uploads/files/" + req.file.filename;
           fileType = ext === ".pdf" ? "pdf" : "epub";
           fileName = req.file.originalname;
           fileSize = req.file.size;
@@ -386,6 +406,7 @@ app.post(
         fileName,
         fileSize,
         postId: postId || null,
+        readBy: [{ user: userId, readAt: new Date() }],
       });
 
       /*

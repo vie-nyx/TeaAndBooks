@@ -79,7 +79,8 @@ const initializeSocket = (io) => {
           sender: userId,
           text: text || "",
           imageUrl: imageUrl || null,
-          postId: postId || null
+          postId: postId || null,
+          readBy: [{ user: userId, readAt: new Date() }]
         });
 
         // Populate sender info
@@ -161,6 +162,30 @@ const initializeSocket = (io) => {
           userId,
           messageIds
         });
+      } catch (err) {
+        socket.emit("error", { message: err.message });
+      }
+    });
+
+    // Handle marking entire conversation as read
+    socket.on("conversation:mark_read", async ({ conversationId }) => {
+      try {
+        await Message.updateMany(
+          {
+            conversationId,
+            sender: { $ne: userId },
+            "readBy.user": { $ne: userId }
+          },
+          {
+            $push: {
+              readBy: {
+                user: userId,
+                readAt: new Date()
+              }
+            }
+          }
+        );
+        socket.emit("conversation:read_updated", { conversationId, unreadCount: 0 });
       } catch (err) {
         socket.emit("error", { message: err.message });
       }

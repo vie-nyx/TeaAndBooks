@@ -93,9 +93,24 @@ const getUserConversations = async (req, res) => {
       .populate("participants", "username avatar")
       .populate("groupAdmin", "username")
       .populate("lastMessage")
-      .sort({ lastMessageAt: -1 });
+      .sort({ lastMessageAt: -1 })
+      .lean();
 
-    res.json(conversations);
+    const convsWithUnread = await Promise.all(
+      conversations.map(async (conv) => {
+        const unreadCount = await Message.countDocuments({
+          conversationId: conv._id,
+          sender: { $ne: userId },
+          "readBy.user": { $ne: userId }
+        });
+        return {
+          ...conv,
+          unreadCount
+        };
+      })
+    );
+
+    res.json(convsWithUnread);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -116,6 +131,23 @@ const getMessages = async (req, res) => {
     if (!conversation.participants.includes(userId)) {
       return res.status(403).json({ message: "Not authorized to view this conversation" });
     }
+
+    // Mark messages as read for this user
+    await Message.updateMany(
+      {
+        conversationId,
+        sender: { $ne: userId },
+        "readBy.user": { $ne: userId }
+      },
+      {
+        $push: {
+          readBy: {
+            user: userId,
+            readAt: new Date()
+          }
+        }
+      }
+    );
 
     const messages = await Message.find({ conversationId })
       .populate("sender", "username avatar")
@@ -177,11 +209,60 @@ const addGroupMembers = async (req, res) => {
   }
 };
 
+// Mark conversation as read
+const markConversationAsRead = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const userId = req.userId;
+
+    await Message.updateMany(
+      {
+        conversationId,
+        sender: { $ne: userId },
+        "readBy.user": { $ne: userId }
+      },
+      {
+        $push: {
+          readBy: {
+            user: userId,
+            readAt: new Date()
+          }
+        }
+      }
+    );
+
+    res.json({ success: true, conversationId, unreadCount: 0 });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Get total unread count across all conversations
+const getTotalUnreadCount = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const conversations = await Conversation.find({ participants: userId }, "_id");
+    const conversationIds = conversations.map(c => c._id);
+
+    const totalUnread = await Message.countDocuments({
+      conversationId: { $in: conversationIds },
+      sender: { $ne: userId },
+      "readBy.user": { $ne: userId }
+    });
+
+    res.json({ totalUnread });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   getOrCreateConversation,
   createGroupChat,
   getUserConversations,
   getMessages,
-  addGroupMembers
+  addGroupMembers,
+  markConversationAsRead,
+  getTotalUnreadCount
 };
 

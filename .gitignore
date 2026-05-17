@@ -1,1 +1,9 @@
+node_modules/
+**/node_modules/
+.env
+**/.env
+data/
+**/data/
+uploads/
+**/uploads/
 entwined-server/firebaseKey.json

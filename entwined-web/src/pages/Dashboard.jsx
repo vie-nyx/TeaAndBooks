@@ -30,6 +30,7 @@ export default function Dashboard() {
   const [outgoing, setOutgoing] = useState([]);
   const [friends, setFriends] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [totalUnread, setTotalUnread] = useState(0);
 
   // 1. Sync activeTab with URL changes
 
@@ -106,10 +107,24 @@ export default function Dashboard() {
     }
   }, []);
 
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const res = await api.get("/api/chat/unread-count");
+      setTotalUnread(res.data.totalUnread);
+    } catch (err) {
+      console.error("Failed to fetch unread count", err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchRequests();
     fetchFriends();
-  }, [fetchRequests, fetchFriends]);
+    fetchUnreadCount();
+    window.addEventListener("chat:unread_updated", fetchUnreadCount);
+    return () => {
+      window.removeEventListener("chat:unread_updated", fetchUnreadCount);
+    };
+  }, [fetchRequests, fetchFriends, fetchUnreadCount]);
 
   // 3. Action Handlers
   const searchUsers = async (value) => {
@@ -181,6 +196,7 @@ export default function Dashboard() {
             onClick={() => handleTabClick("chat")}
           >
             Chat
+            {totalUnread > 0 && <span className="notification-badge">{totalUnread}</span>}
           </button>
           <button
             className={`tab-button ${activeTab === "feed" ? "active" : ""}`}
