@@ -32,7 +32,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <Route path="/verify-email/:token" element={<VerifyEmail />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-          
         </Routes>
       </BrowserRouter>
     </AuthProvider>

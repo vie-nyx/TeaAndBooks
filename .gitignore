@@ -1,1 +1,4 @@
 entwined-server/firebaseKey.json
+node_modules/
+entwined-server/node_modules/
+entwined-web/node_modules/

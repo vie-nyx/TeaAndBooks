@@ -138,7 +138,7 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 /*
@@ -258,11 +258,7 @@ app.post(
         });
       }
 
-      if (
-        text &&
-        typeof text === "string" &&
-        text.length > 5000
-      ) {
+      if (text && typeof text === "string" && text.length > 5000) {
         return res.status(400).json({
           success: false,
           message: "Message exceeds maximum length",
@@ -291,7 +287,7 @@ app.post(
       */
 
       const isParticipant = conversation.participants.some(
-        (id) => id.toString() === userId.toString()
+        (id) => id.toString() === userId.toString(),
       );
 
       if (!isParticipant) {
@@ -396,10 +392,7 @@ app.post(
 
       await message.populate("sender", "username avatar");
 
-      await message.populate(
-        "postId",
-        "caption imageUrl user createdAt"
-      );
+      await message.populate("postId", "caption imageUrl user createdAt");
 
       if (message.postId) {
         await message.populate({
@@ -444,23 +437,17 @@ app.post(
       ========================
       */
 
-      io.to(`conversation:${conversationId}`).emit(
-        "message:new",
-        message
-      );
+      io.to(`conversation:${conversationId}`).emit("message:new", message);
 
       const participantIds = conversation.participants
         .filter((id) => id.toString() !== userId.toString())
         .map((id) => id.toString());
 
       participantIds.forEach((participantId) => {
-        io.to(`user:${participantId}`).emit(
-          "message:notification",
-          {
-            conversationId,
-            message,
-          }
-        );
+        io.to(`user:${participantId}`).emit("message:notification", {
+          conversationId,
+          message,
+        });
       });
 
       /*
@@ -481,7 +468,7 @@ app.post(
         message: "Internal server error",
       });
     }
-  }
+  },
 );
 
 /*

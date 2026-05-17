@@ -13,7 +13,7 @@ const createAccessToken = (user) => {
   return jwt.sign(
     { id: user._id, tokenVersion: user.tokenVersion },
     process.env.JWT_SECRET,
-    { expiresIn: "15m" }
+    { expiresIn: "15m" },
   );
 };
 
@@ -21,7 +21,7 @@ const createRefreshToken = (user) => {
   return jwt.sign(
     { id: user._id, tokenVersion: user.tokenVersion },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: "7d" }
+    { expiresIn: "7d" },
   );
 };
 
@@ -29,6 +29,7 @@ const createRefreshToken = (user) => {
 
 const signup = async (req, res) => {
   try {
+    console.log("🔐 [SIGNUP] Received signup request:", req.body);
     const { username, email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
@@ -48,7 +49,7 @@ const signup = async (req, res) => {
       email,
       password: hashedPassword,
       emailVerificationToken: hashedToken,
-      emailVerificationExpire: Date.now() + 24 * 60 * 60 * 1000
+      emailVerificationExpire: Date.now() + 24 * 60 * 60 * 1000,
     });
 
     const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${rawToken}`;
@@ -56,11 +57,10 @@ const signup = async (req, res) => {
     await sendEmail({
       email: user.email,
       subject: "Verify your email",
-      html: `<a href="${verificationUrl}">${verificationUrl}</a>`
+      html: `<a href="${verificationUrl}">${verificationUrl}</a>`,
     });
 
     res.json({ message: "Signup successful. Please verify your email." });
-
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -77,7 +77,7 @@ const verifyEmail = async (req, res) => {
 
     const user = await User.findOne({
       emailVerificationToken: hashedToken,
-      emailVerificationExpire: { $gt: Date.now() }
+      emailVerificationExpire: { $gt: Date.now() },
     });
 
     if (!user)
@@ -89,9 +89,42 @@ const verifyEmail = async (req, res) => {
     await user.save();
 
     res.json({ message: "Email verified successfully" });
-
   } catch {
     res.status(500).json({ message: "Verification failed" });
+  }
+};
+/* ================= RESEND VERIFICATION EMAIL ================= */
+const resendverification = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) return res.status(400).json({ message: "User not found" });
+
+    if (user.isVerified)
+      return res.status(400).json({ message: "Email is already verified" });
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
+
+    user.emailVerificationToken = hashedToken;
+    user.emailVerificationExpire = Date.now() + 24 * 60 * 60 * 1000;
+    await user.save();
+
+    const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${rawToken}`;
+
+    await sendEmail({
+      email: user.email,
+      subject: "Verify your email",
+      html: `<a href="${verificationUrl}">${verificationUrl}</a>`,
+    });
+
+    res.json({ message: "Verification email sent" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -102,15 +135,16 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user)
-      return res.status(400).json({ message: "User not found" });
+    if (!user) return res.status(400).json({ message: "User not found" });
 
     if (!user.isVerified)
-      return res.status(400).json({ message: "Please verify your email first" });
+      return res
+        .status(400)
+        .json({ message: "Please verify your email first" });
 
     if (user.lockUntil && user.lockUntil > Date.now()) {
       return res.status(403).json({
-        message: "Account locked. Try again later."
+        message: "Account locked. Try again later.",
       });
     }
 
@@ -138,7 +172,7 @@ const login = async (req, res) => {
       httpOnly: true,
       secure: false, // true in production
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({
@@ -146,10 +180,48 @@ const login = async (req, res) => {
       user: {
         _id: user._id,
         username: user.username,
-        email: user.email
-      }
+        email: user.email,
+      },
+<<<<<<< HEAD
+    });
+=======
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+/* ================= RESEND VERIFICATION EMAIL ================= */
+const resendverification = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) return res.status(400).json({ message: "User not found" });
+
+    if (user.isVerified)
+      return res.status(400).json({ message: "Email is already verified" });
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
+
+    user.emailVerificationToken = hashedToken;
+    user.emailVerificationExpire = Date.now() + 24 * 60 * 60 * 1000;
+    await user.save();
+
+    const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${rawToken}`;
+
+    await sendEmail({
+      email: user.email,
+      subject: "Verify your email",
+      html: `<a href="${verificationUrl}">${verificationUrl}</a>`,
     });
 
+    res.json({ message: "Verification email sent" });
+>>>>>>> dc5ba42942924184ae13ab528d32613d13a99e9f
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -170,7 +242,6 @@ const refreshTokenHandler = async (req, res) => {
 
     const newAccessToken = createAccessToken(user);
     res.json({ accessToken: newAccessToken });
-
   } catch {
     res.sendStatus(403);
   }
@@ -204,7 +275,7 @@ const forgotPassword = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user)
       return res.status(200).json({
-        message: "If this email exists, a reset link has been sent."
+        message: "If this email exists, a reset link has been sent.",
       });
 
     const rawToken = crypto.randomBytes(32).toString("hex");
@@ -222,11 +293,10 @@ const forgotPassword = async (req, res) => {
     await sendEmail({
       email: user.email,
       subject: "Password Reset",
-      html: `<a href="${resetUrl}">${resetUrl}</a>`
+      html: `<a href="${resetUrl}">${resetUrl}</a>`,
     });
 
     res.json({ message: "Reset link sent" });
-
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -243,7 +313,7 @@ const resetPassword = async (req, res) => {
 
     const user = await User.findOne({
       passwordResetToken: hashedToken,
-      passwordResetExpire: { $gt: Date.now() }
+      passwordResetExpire: { $gt: Date.now() },
     });
 
     if (!user)
@@ -255,7 +325,6 @@ const resetPassword = async (req, res) => {
     await user.save();
 
     res.json({ message: "Password reset successful" });
-
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -280,18 +349,15 @@ const googleLogin = async (req, res) => {
         username: name,
         email,
         password: null,
-        isVerified: true
+        isVerified: true,
       });
     }
 
-    const jwtToken = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const jwtToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     res.json({ user, token: jwtToken });
-
   } catch (err) {
     console.error("Google login error:", err);
     res.status(500).json({ message: "Google login failed" });
@@ -315,8 +381,8 @@ const verifyToken = async (req, res) => {
         favoriteGenres: user.favoriteGenres || [],
         readingPersona: user.readingPersona || "",
         readingStats: user.readingStats || {},
-        createdAt: user.createdAt
-      }
+        createdAt: user.createdAt,
+      },
     });
   } catch (err) {
     res.status(500).json({ message: err.message || "Verification failed" });
@@ -332,5 +398,6 @@ module.exports = {
   logout,
   logoutAll,
   googleLogin,
-  verifyToken
+  verifyToken,
+  resendverification,
 };

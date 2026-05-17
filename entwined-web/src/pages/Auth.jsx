@@ -43,20 +43,15 @@ export default function Auth() {
       await axios.post(
         `${API}/signup`,
         { username, email, password },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       alert("Signup successful! Please verify your email.");
       setIsSignup(false);
       setUsername("");
       setPassword("");
-
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-        err.message ||
-        "Signup failed."
-      );
+      setError(err.response?.data?.message || err.message || "Signup failed.");
     } finally {
       setLoading(false);
     }
@@ -80,14 +75,14 @@ export default function Auth() {
       const res = await axios.post(
         `${API}/login`,
         { email, password },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       console.log("✅ [LOGIN] Login response received:", {
         hasUser: !!res.data.user,
         hasAccessToken: !!res.data.accessToken,
         accessTokenLength: res.data.accessToken?.length || 0,
-        accessTokenPreview: res.data.accessToken?.substring(0, 20) + "..."
+        accessTokenPreview: res.data.accessToken?.substring(0, 20) + "...",
       });
 
       if (!res.data.accessToken) {
@@ -98,30 +93,26 @@ export default function Auth() {
 
       console.log("💾 [LOGIN] Storing token in localStorage...");
       await login(res.data.user, res.data.accessToken);
-      
+
       // Verify token was stored
       const storedToken = localStorage.getItem("token");
       console.log("✅ [LOGIN] Token stored:", {
         exists: !!storedToken,
         length: storedToken?.length || 0,
-        matches: storedToken === res.data.accessToken
+        matches: storedToken === res.data.accessToken,
       });
 
       navigate("/dashboard");
-
     } catch (err) {
       console.error("❌ [LOGIN] Login error:", err);
       const message =
-        err.response?.data?.message ||
-        err.message ||
-        "Login failed.";
+        err.response?.data?.message || err.message || "Login failed.";
 
       setError(message);
 
       if (message.toLowerCase().includes("verify")) {
         setShowResend(true);
       }
-
     } finally {
       setLoading(false);
     }
@@ -141,15 +132,13 @@ export default function Auth() {
       await axios.post(
         `${API}/resend-verification`,
         { email },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       alert("Verification email sent.");
-
     } catch (err) {
       setError(
-        err.response?.data?.message ||
-        "Failed to resend verification email."
+        err.response?.data?.message || "Failed to resend verification email.",
       );
     } finally {
       setResendLoading(false);
@@ -167,7 +156,7 @@ export default function Auth() {
       const res = await axios.post(
         `${API}/google`,
         { token: credentialResponse.credential },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       const backendToken = res.data.accessToken || res.data.token;
@@ -187,21 +176,18 @@ export default function Auth() {
 
       console.log("💾 [GOOGLE LOGIN] Storing token in localStorage...");
       await login(res.data.user, backendToken);
-      
+
       const storedToken = localStorage.getItem("token");
       console.log("✅ [GOOGLE LOGIN] Token stored:", {
         exists: !!storedToken,
-        length: storedToken?.length || 0
+        length: storedToken?.length || 0,
       });
 
       navigate("/dashboard");
-
     } catch (err) {
       console.error("❌ [GOOGLE LOGIN] Login error:", err);
       setError(
-        err.response?.data?.message ||
-        err.message ||
-        "Google login failed."
+        err.response?.data?.message || err.message || "Google login failed.",
       );
     } finally {
       setLoading(false);
@@ -213,7 +199,6 @@ export default function Auth() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-
         <div className="auth-title">
           {isSignup ? "Create Account" : "Welcome Back"}
         </div>
@@ -277,9 +262,7 @@ export default function Auth() {
                 onClick={handleResend}
                 disabled={resendLoading}
               >
-                {resendLoading
-                  ? "Sending..."
-                  : "Resend Verification Email"}
+                {resendLoading ? "Sending..." : "Resend Verification Email"}
               </button>
             )}
           </>
@@ -306,7 +289,6 @@ export default function Auth() {
             ? "Already have an account? Login"
             : "Don't have an account? Sign Up"}
         </div>
-
       </div>
     </div>
   );

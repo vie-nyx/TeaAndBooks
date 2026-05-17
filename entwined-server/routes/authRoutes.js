@@ -8,16 +8,16 @@ const {
   refreshTokenHandler,
   logout,
   logoutAll,
-  googleLogin
+  googleLogin,
+  resendverification,
 } = require("../controllers/authController");
 const rateLimit = require("express-rate-limit");
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 100, // Limit each IP to 100 requests per windowMs
-  message: "Too many requests, please try again later."
+  message: "Too many requests, please try again later.",
 });
-
 
 const authMiddleware = require("../middleware/authMiddleware");
 
@@ -27,6 +27,7 @@ router.post("/signup", signup);
 router.post("/login", limiter, login);
 router.post("/google", googleLogin);
 router.get("/verify-email/:token", verifyEmail);
+router.post("/resend-verification", resendverification);
 
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
