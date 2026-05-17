@@ -49,7 +49,17 @@ const userSchema = new mongoose.Schema({
   tokenVersion: { type: Number, default: 0 },
 
   loginAttempts: { type: Number, default: 0 },
-  lockUntil: Date
+  lockUntil: Date,
+
+  // === NEW PRESENCE TRACKING FIELDS ===
+  isOnline: {
+    type: Boolean,
+    default: false
+  },
+  lastSeen: {
+    type: Date,
+    default: Date.now
+  }
 }, { timestamps: true });
 
 // Virtuals
