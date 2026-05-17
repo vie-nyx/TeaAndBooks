@@ -3,8 +3,8 @@ const Message = require("../models/Message");
 const Conversation = require("../models/Conversation");
 const User = require("../models/User");
 
-// Store online users and typing indicators
-const onlineUsers = new Map(); // userId -> socketId
+// Store online users (userId -> Set of socketIds) and typing indicators
+const onlineUsers = new Map(); 
 const typingUsers = new Map(); // conversationId -> Set of userIds
 
 const authenticateSocket = (socket, next) => {
@@ -28,17 +28,31 @@ const authenticateSocket = (socket, next) => {
 const initializeSocket = (io) => {
   io.use(authenticateSocket);
 
-  io.on("connection", (socket) => {
+  io.on("connection", async (socket) => {
     const userId = socket.userId;
-    onlineUsers.set(userId, socket.id);
+
+    // === MULTI-TAB PRESENCE TRACKING SYSTEM ===
+    if (!onlineUsers.has(userId)) {
+      // First tab opened: Initialize the tracking set
+      onlineUsers.set(userId, new Set());
+
+      try {
+        // Update database presence status flags
+        await User.findByIdAndUpdate(userId, { isOnline: true });
+        
+        // Broadcast to everyone else that this user is now online
+        socket.broadcast.emit("user:online", { userId });
+      } catch (err) {
+        console.error(`Error updating online status for user ${userId}:`, err);
+      }
+    }
+    
+    // Track this specific socket connection session instance
+    onlineUsers.get(userId).add(socket.id);
 
     // Join user's personal room
     socket.join(`user:${userId}`);
-
-    // Broadcast online status
-    socket.broadcast.emit("user:online", { userId });
-
-    console.log(`User ${userId} connected`);
+    console.log(`User ${userId} connected (Session: ${socket.id}). Total tabs open: ${onlineUsers.get(userId).size}`);
 
     // Handle joining conversation rooms
     socket.on("conversation:join", async ({ conversationId }) => {
@@ -167,10 +181,39 @@ const initializeSocket = (io) => {
     });
 
     // Handle disconnection
-    socket.on("disconnect", () => {
-      onlineUsers.delete(userId);
-      socket.broadcast.emit("user:offline", { userId });
-      console.log(`User ${userId} disconnected`);
+    socket.on("disconnect", async () => {
+      if (onlineUsers.has(userId)) {
+        const userConnections = onlineUsers.get(userId);
+        
+        // Remove this specific closing tab's socket ID
+        userConnections.delete(socket.id);
+        
+        // If no active connections remain, the user is completely offline
+        if (userConnections.size === 0) {
+          onlineUsers.delete(userId);
+          const offlineTimestamp = new Date();
+
+          try {
+            // Persist changes in MongoDB fields
+            await User.findByIdAndUpdate(userId, { 
+              isOnline: false, 
+              lastSeen: offlineTimestamp 
+            });
+            
+            // Broadcast offline state with the updated timestamp out to peer clients
+            socket.broadcast.emit("user:offline", { 
+              userId, 
+              lastSeen: offlineTimestamp 
+            });
+          } catch (err) {
+            console.error(`Error updating offline status for user ${userId}:`, err);
+          }
+          
+          console.log(`User ${userId} went completely offline.`);
+        } else {
+          console.log(`User ${userId} closed a tab. Remaining open tabs: ${userConnections.size}`);
+        }
+      }
     });
   });
 
@@ -178,4 +221,3 @@ const initializeSocket = (io) => {
 };
 
 module.exports = { initializeSocket, onlineUsers };
-

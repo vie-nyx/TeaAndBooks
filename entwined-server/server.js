@@ -47,6 +47,8 @@ const Message = require("./models/Message");
 const Conversation = require("./models/Conversation");
 const Post = require("./models/Post");
 const SharedPost = require("./models/SharedPost");
+// === ADDED USER MODEL FOR PRESENCE CLEANUP ===
+const User = require("./models/User"); 
 
 /*
 ========================
@@ -174,8 +176,19 @@ mongoose
   .connect(process.env.MONGO_URI, {
     serverSelectionTimeoutMS: 5000,
   })
-  .then(() => {
+  .then(async () => { // <-- Made this async to handle the cleanup
     console.log("MongoDB Connected");
+
+    // === NEW STALE PRESENCE CLEANUP SCRIPT ===
+    try {
+      await User.updateMany(
+        { isOnline: true },
+        { isOnline: false, lastSeen: new Date() }
+      );
+      console.log("Presence states synchronized safely with the database.");
+    } catch (error) {
+      console.error("Error synchronizing startup presence vectors:", error);
+    }
   })
   .catch((err) => {
     console.error("MongoDB Error:", err);
@@ -207,9 +220,7 @@ MESSAGE ROUTE
 
 app.post(
   "/api/chat/message",
-
   auth,
-
   (req, res, next) => {
     upload.single("file")(req, res, (err) => {
       if (err) {
@@ -242,14 +253,7 @@ app.post(
   async (req, res) => {
     try {
       const { conversationId, text, postId } = req.body;
-
       const userId = req.userId;
-
-      /*
-      ========================
-      BASIC VALIDATION
-      ========================
-      */
 
       if (!conversationId) {
         return res.status(400).json({
@@ -258,22 +262,12 @@ app.post(
         });
       }
 
-      if (
-        text &&
-        typeof text === "string" &&
-        text.length > 5000
-      ) {
+      if (text && typeof text === "string" && text.length > 5000) {
         return res.status(400).json({
           success: false,
           message: "Message exceeds maximum length",
         });
       }
-
-      /*
-      ========================
-      FIND CONVERSATION
-      ========================
-      */
 
       const conversation = await Conversation.findById(conversationId);
 
@@ -283,12 +277,6 @@ app.post(
           message: "Conversation not found",
         });
       }
-
-      /*
-      ========================
-      AUTHORIZATION
-      ========================
-      */
 
       const isParticipant = conversation.participants.some(
         (id) => id.toString() === userId.toString()
@@ -300,12 +288,6 @@ app.post(
           message: "Not authorized",
         });
       }
-
-      /*
-      ========================
-      OPTIONAL POST SHARE
-      ========================
-      */
 
       let sharedPost = null;
 
@@ -319,12 +301,6 @@ app.post(
           });
         }
       }
-
-      /*
-      ========================
-      FILE PROCESSING
-      ========================
-      */
 
       let imageUrl = null;
       let fileUrl = null;
@@ -370,12 +346,6 @@ app.post(
         }
       }
 
-      /*
-      ========================
-      CREATE MESSAGE
-      ========================
-      */
-
       const message = await Message.create({
         conversationId,
         sender: userId,
@@ -387,12 +357,6 @@ app.post(
         fileSize,
         postId: postId || null,
       });
-
-      /*
-      ========================
-      POPULATE MESSAGE
-      ========================
-      */
 
       await message.populate("sender", "username avatar");
 
@@ -411,12 +375,6 @@ app.post(
         });
       }
 
-      /*
-      ========================
-      SHARED POST TRACKING
-      ========================
-      */
-
       if (sharedPost) {
         await SharedPost.create({
           post: sharedPost._id,
@@ -427,22 +385,10 @@ app.post(
         });
       }
 
-      /*
-      ========================
-      UPDATE CONVERSATION
-      ========================
-      */
-
       conversation.lastMessage = message._id;
       conversation.lastMessageAt = new Date();
 
       await conversation.save();
-
-      /*
-      ========================
-      SOCKET EVENTS
-      ========================
-      */
 
       io.to(`conversation:${conversationId}`).emit(
         "message:new",
@@ -462,12 +408,6 @@ app.post(
           }
         );
       });
-
-      /*
-      ========================
-      RESPONSE
-      ========================
-      */
 
       return res.status(201).json({
         success: true,
