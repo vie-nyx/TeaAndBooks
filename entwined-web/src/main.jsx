@@ -13,8 +13,14 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ProfileDashboard from "./components/profile/ProfileDashboard";
 
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+if (!googleClientId) {
+  console.error("Missing VITE_GOOGLE_CLIENT_ID. Google login will be unavailable.");
+}
+
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <GoogleOAuthProvider clientId="1029531006959-dpsmtmah0s21u13nt5ncl7mncr09k0v6.apps.googleusercontent.com">
+  <GoogleOAuthProvider clientId={googleClientId || ""}>
     <AuthProvider>
       <BrowserRouter>
         <Routes>

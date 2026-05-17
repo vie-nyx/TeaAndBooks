@@ -25,6 +25,101 @@ const createRefreshToken = (user) => {
   );
 };
 
+const setRefreshTokenCookie = (res, refreshToken) => {
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: false, // true in production
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
+};
+
+const serializeAuthUser = (user) => ({
+  _id: user._id,
+  username: user.username,
+  email: user.email
+});
+
+const buildUsernameCandidate = (name = "", email = "") => {
+  const fallback = email.split("@")[0] || "";
+  const base = name || fallback;
+  const sanitized = base.toLowerCase().replace(/[^a-z0-9]+/g, "");
+
+  if (sanitized) {
+    return sanitized.slice(0, 20);
+  }
+
+  return `reader${crypto.randomBytes(3).toString("hex")}`;
+};
+
+const createUniqueUsername = async (name, email) => {
+  const base = buildUsernameCandidate(name, email);
+  let username = base;
+  let suffix = 1;
+
+  while (await User.exists({ username })) {
+    const suffixText = `${suffix}`;
+    const truncatedBase = base.slice(
+      0,
+      Math.max(1, 20 - suffixText.length)
+    );
+    username = `${truncatedBase}${suffixText}`;
+    suffix += 1;
+  }
+
+  return username;
+};
+
+const isProduction = process.env.NODE_ENV === "production";
+
+const createVerificationToken = () => {
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(rawToken)
+    .digest("hex");
+
+  return { rawToken, hashedToken };
+};
+
+const sendVerificationEmail = async (user, rawToken) => {
+  const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${rawToken}`;
+
+  await sendEmail({
+    email: user.email,
+    subject: "Verify your email",
+    html: `<a href="${verificationUrl}">${verificationUrl}</a>`
+  });
+};
+
+const sendPasswordResetEmail = async (user, rawToken) => {
+  const resetUrl = `${process.env.CLIENT_URL}/reset-password/${rawToken}`;
+
+  await sendEmail({
+    email: user.email,
+    subject: "Password Reset",
+    html: `<a href="${resetUrl}">${resetUrl}</a>`
+  });
+};
+
+const handleEmailDeliveryFailure = async (user, error) => {
+  if (!isProduction) {
+    user.isVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpire = undefined;
+    await user.save();
+    return "Email delivery is unavailable in local development, so your account was verified automatically.";
+  }
+
+  await User.deleteOne({ _id: user._id });
+  throw error;
+};
+
+const buildEmailFailureMessage = (fallbackMessage) => {
+  return fallbackMessage ||
+    "Email delivery is not configured correctly. Use a Gmail app password or configure SMTP credentials.";
+};
+
 /* ================= SIGNUP ================= */
 
 const signup = async (req, res) => {
@@ -37,11 +132,7 @@ const signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    const rawToken = crypto.randomBytes(32).toString("hex");
-    const hashedToken = crypto
-      .createHash("sha256")
-      .update(rawToken)
-      .digest("hex");
+    const { rawToken, hashedToken } = createVerificationToken();
 
     const user = await User.create({
       username,
@@ -51,15 +142,13 @@ const signup = async (req, res) => {
       emailVerificationExpire: Date.now() + 24 * 60 * 60 * 1000
     });
 
-    const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${rawToken}`;
-
-    await sendEmail({
-      email: user.email,
-      subject: "Verify your email",
-      html: `<a href="${verificationUrl}">${verificationUrl}</a>`
-    });
-
-    res.json({ message: "Signup successful. Please verify your email." });
+    try {
+      await sendVerificationEmail(user, rawToken);
+      res.json({ message: "Signup successful. Please verify your email." });
+    } catch (error) {
+      const fallbackMessage = await handleEmailDeliveryFailure(user, error);
+      res.status(201).json({ message: buildEmailFailureMessage(fallbackMessage) });
+    }
 
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -134,20 +223,11 @@ const login = async (req, res) => {
     const accessToken = createAccessToken(user);
     const refreshToken = createRefreshToken(user);
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: false, // true in production
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    setRefreshTokenCookie(res, refreshToken);
 
     res.json({
       accessToken,
-      user: {
-        _id: user._id,
-        username: user.username,
-        email: user.email
-      }
+      user: serializeAuthUser(user)
     });
 
   } catch (err) {
@@ -207,26 +287,83 @@ const forgotPassword = async (req, res) => {
         message: "If this email exists, a reset link has been sent."
       });
 
-    const rawToken = crypto.randomBytes(32).toString("hex");
+    const { rawToken, hashedToken } = createVerificationToken();
 
-    user.passwordResetToken = crypto
-      .createHash("sha256")
-      .update(rawToken)
-      .digest("hex");
+    user.passwordResetToken = hashedToken;
 
     user.passwordResetExpire = Date.now() + 15 * 60 * 1000;
     await user.save();
 
-    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${rawToken}`;
+    try {
+      await sendPasswordResetEmail(user, rawToken);
+      res.json({ message: "Reset link sent" });
+    } catch (error) {
+      if (!isProduction) {
+        res.json({
+          message: "Email delivery is unavailable in local development. Use the reset link returned in this response.",
+          resetUrl: `${process.env.CLIENT_URL}/reset-password/${rawToken}`
+        });
+        return;
+      }
 
-    await sendEmail({
-      email: user.email,
-      subject: "Password Reset",
-      html: `<a href="${resetUrl}">${resetUrl}</a>`
-    });
+      user.passwordResetToken = undefined;
+      user.passwordResetExpire = undefined;
+      await user.save();
 
-    res.json({ message: "Reset link sent" });
+      res.status(500).json({
+        message: buildEmailFailureMessage()
+      });
+    }
 
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const resendVerification = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: "Email is already verified" });
+    }
+
+    const { rawToken, hashedToken } = createVerificationToken();
+
+    user.emailVerificationToken = hashedToken;
+    user.emailVerificationExpire = Date.now() + 24 * 60 * 60 * 1000;
+    await user.save();
+
+    try {
+      await sendVerificationEmail(user, rawToken);
+      res.json({ message: "Verification email sent." });
+    } catch (error) {
+      if (!isProduction) {
+        user.isVerified = true;
+        user.emailVerificationToken = undefined;
+        user.emailVerificationExpire = undefined;
+        await user.save();
+
+        res.json({
+          message: "Email delivery is unavailable in local development, so your account was verified automatically."
+        });
+        return;
+      }
+
+      res.status(500).json({
+        message: buildEmailFailureMessage()
+      });
+    }
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -265,32 +402,65 @@ const googleLogin = async (req, res) => {
   try {
     const { token } = req.body;
 
+    if (!token) {
+      return res.status(400).json({ message: "Google token is required" });
+    }
+
     const ticket = await client.verifyIdToken({
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
 
     const payload = ticket.getPayload();
-    const { email, name } = payload;
+    const { email, name, email_verified: emailVerified } = payload;
+
+    if (!email) {
+      return res.status(400).json({ message: "Google account email is missing" });
+    }
+
+    if (!emailVerified) {
+      return res.status(400).json({ message: "Google email is not verified" });
+    }
 
     let user = await User.findOne({ email });
 
     if (!user) {
+      const username = await createUniqueUsername(name, email);
+
       user = await User.create({
-        username: name,
+        name: name || "",
+        username,
         email,
         password: null,
         isVerified: true
       });
+    } else {
+      let shouldSave = false;
+
+      if (!user.isVerified) {
+        user.isVerified = true;
+        shouldSave = true;
+      }
+
+      if (!user.name && name) {
+        user.name = name;
+        shouldSave = true;
+      }
+
+      if (shouldSave) {
+        await user.save();
+      }
     }
 
-    const jwtToken = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const accessToken = createAccessToken(user);
+    const refreshToken = createRefreshToken(user);
 
-    res.json({ user, token: jwtToken });
+    setRefreshTokenCookie(res, refreshToken);
+
+    res.json({
+      accessToken,
+      user: serializeAuthUser(user)
+    });
 
   } catch (err) {
     console.error("Google login error:", err);
@@ -326,6 +496,7 @@ module.exports = {
   signup,
   login,
   verifyEmail,
+  resendVerification,
   forgotPassword,
   resetPassword,
   refreshTokenHandler,

@@ -19,6 +19,9 @@ For reference while testing friend-related features, search for users like:
 * Secure Refresh Tokens
 * Protected Routes
 
+Auth setup and troubleshooting:
+- [AUTH_SETUP_TROUBLESHOOTING.md](./AUTH_SETUP_TROUBLESHOOTING.md)
+
 ### Social Features
 
 * Create and share posts
