@@ -40,13 +40,13 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      await axios.post(
+      const response = await axios.post(
         `${API}/signup`,
         { username, email, password },
         { withCredentials: true }
       );
 
-      alert("Signup successful! Please verify your email.");
+      alert(response.data.message || "Signup successful! You can now log in.");
       setIsSignup(false);
       setUsername("");
       setPassword("");
