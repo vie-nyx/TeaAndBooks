@@ -6,6 +6,7 @@ import "../styles/Auth.css";
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [resetUrl, setResetUrl] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -18,12 +19,15 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      await axios.post(
+      const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/auth/forgot-password`,
         { email }
       );
 
-      setMessage("If this email exists, a reset link has been sent.");
+      setMessage(res.data.message || "If this email exists, a reset link has been sent.");
+      if (res.data.resetUrl) {
+        setResetUrl(res.data.resetUrl);
+      }
     } catch (err) {
       const errorMessage =
         err.response?.data?.message ||
@@ -61,18 +65,34 @@ export default function ForgotPassword() {
 
         {/* ── Success view (replaces form) ── */}
         {message ? (
-          <>
-            <div className="auth-success">{message}</div>
-            <p className="auth-subtitle" style={{ marginBottom: 0 }}>
-              Check your inbox (and spam folder) for the reset link.
-            </p>
-            <button
-              className="auth-button"
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            <div className="auth-success" style={{ textAlign: "center" }}>{message}</div>
+            
+            {resetUrl ? (
+              <a 
+                href={resetUrl} 
+                className="auth-button" 
+                style={{ textDecoration: "none", textAlign: "center", display: "inline-block" }}
+              >
+                Reset Password Now
+              </a>
+            ) : (
+              <p className="auth-subtitle" style={{ marginBottom: 0 }}>
+                Check your inbox (and spam folder) for the reset link.
+              </p>
+            )}
+
+            <span
+              className="auth-back-link"
               onClick={() => navigate("/")}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === "Enter" && navigate("/")}
+              aria-label="Back to login"
             >
-              Back to Login
-            </button>
-          </>
+              ← Back to Login
+            </span>
+          </div>
         ) : (
           <>
             {/* Error banner */}

@@ -47,10 +47,10 @@ const signup = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      emailVerificationToken: hashedToken,
-      emailVerificationExpire: Date.now() + 24 * 60 * 60 * 1000
+      isVerified: true // Bypassed email verification for testing
     });
 
+    /* 
     const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${rawToken}`;
 
     await sendEmail({
@@ -58,8 +58,9 @@ const signup = async (req, res) => {
       subject: "Verify your email",
       html: `<a href="${verificationUrl}">${verificationUrl}</a>`
     });
+    */
 
-    res.json({ message: "Signup successful. Please verify your email." });
+    res.json({ message: "Signup successful. You can now log in." });
 
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -219,13 +220,18 @@ const forgotPassword = async (req, res) => {
 
     const resetUrl = `${process.env.CLIENT_URL}/reset-password/${rawToken}`;
 
+    /* 
     await sendEmail({
       email: user.email,
       subject: "Password Reset",
       html: `<a href="${resetUrl}">${resetUrl}</a>`
     });
+    */
 
-    res.json({ message: "Reset link sent" });
+    res.json({ 
+      message: "Testing Mode: Use the link below to reset your password.",
+      resetUrl 
+    });
 
   } catch (err) {
     res.status(500).json({ message: err.message });
