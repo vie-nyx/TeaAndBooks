@@ -30,6 +30,7 @@ export default function Dashboard() {
   const [outgoing, setOutgoing] = useState([]);
   const [friends, setFriends] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [sendingRequests, setSendingRequests] = useState([]);
 
   // 1. Sync activeTab with URL changes
 
@@ -131,11 +132,15 @@ export default function Dashboard() {
 
   const sendRequest = async (username) => {
     try {
+      setSendingRequests((prev) => [...prev, username]);
+
       await api.post("/api/friends/request", { username });
-      alert("Request sent");
+
       fetchRequests();
     } catch (err) {
       console.log(err);
+    } finally {
+      setSendingRequests((prev) => prev.filter((name) => name !== username));
     }
   };
 
@@ -220,13 +225,13 @@ export default function Dashboard() {
             "/dashboard/profile/"
           )
         ) && (
-            <div className="feed-layout">
-              <ProfileDashboard
-                key={profileId || "own-profile"}
-                userId={profileId}
-              />
-            </div>
-          )}
+          <div className="feed-layout">
+            <ProfileDashboard
+              key={profileId || "own-profile"}
+              userId={profileId}
+            />
+          </div>
+        )}
 
         {activeTab === "friends" && (
           <div className="dashboard-card">
@@ -243,11 +248,38 @@ export default function Dashboard() {
                   results.map((user) => (
                     <div key={user._id} className="user-result">
                       <span>{user.username}</span>
-                      <button onClick={() => sendRequest(user.username)}>Add</button>
+                      <button
+                        disabled={
+                          sendingRequests.includes(user.username) ||
+                          outgoing.some(
+                            (req) => req.receiver.username === user.username,
+                          )
+                        }
+                        className={`friend-request-btn ${
+                          outgoing.some(
+                            (req) => req.receiver.username === user.username,
+                          )
+                            ? "request-sent-btn"
+                            : ""
+                        }`}
+                        onClick={() => sendRequest(user.username)}
+                      >
+                        {sendingRequests.includes(user.username) ? (
+                          <span className="button-loader"></span>
+                        ) : outgoing.some(
+                            (req) => req.receiver.username === user.username,
+                          ) ? (
+                          "Pending"
+                        ) : (
+                          "Add"
+                        )}
+                      </button>
                     </div>
                   ))
                 ) : (
-                  <p className="empty-state">Search for readers and book lovers.</p>
+                  <p className="empty-state">
+                    Search for readers and book lovers.
+                  </p>
                 )}
               </div>
 
@@ -257,7 +289,9 @@ export default function Dashboard() {
                   incoming.map((req) => (
                     <div key={req._id} className="user-result">
                       <span>{req.sender.username}</span>
-                      <button onClick={() => acceptRequest(req._id)}>Accept</button>
+                      <button onClick={() => acceptRequest(req._id)}>
+                        Accept
+                      </button>
                     </div>
                   ))
                 ) : (
@@ -273,11 +307,7 @@ export default function Dashboard() {
                   <div
                     key={friend._id}
                     className="user-result clickable-user"
-                    onClick={() =>
-                      navigate(
-                        `/dashboard/profile/${friend._id}`
-                      )
-                    }
+                    onClick={() => navigate(`/dashboard/profile/${friend._id}`)}
                   >
                     <span>{friend.username}</span>
                   </div>
