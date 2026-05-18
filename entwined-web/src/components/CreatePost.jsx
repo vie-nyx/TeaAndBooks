@@ -44,18 +44,8 @@ export default function CreatePost() {
 
     // Check token before sending request
     const token = localStorage.getItem("token");
-    console.log("📝 [CREATE POST] Preparing to create post:", {
-      hasImageFile: !!imageFile,
-      imageFileName: imageFile.name,
-      imageFileSize: imageFile.size,
-      captionLength: caption.length,
-      hasToken: !!token,
-      tokenType: typeof token,
-      tokenValue: token === "undefined" || token === "null" ? token : (token ? token.substring(0, 30) + "..." : "null")
-    });
 
     if (!token || token === "undefined" || token === "null") {
-      console.error("❌ [CREATE POST] No valid token found!");
       alert("You are not logged in. Please log in again.");
       return;
     }
@@ -68,14 +58,7 @@ export default function CreatePost() {
         formData.append("caption", caption.trim());
       }
 
-      console.log("📤 [CREATE POST] Sending request to /api/posts/create");
-      console.log("📤 [CREATE POST] FormData entries:", {
-        hasImage: formData.has("image"),
-        hasCaption: formData.has("caption"),
-        captionValue: caption.trim()
-      });
-
-      const response = await api.post("/api/posts/create", formData, {
+      await api.post("/api/posts/create", formData, {
         headers: { 
           "Content-Type": "multipart/form-data",
           // Explicitly ensure Authorization header is preserved
@@ -83,19 +66,10 @@ export default function CreatePost() {
         },
       });
 
-      console.log("✅ [CREATE POST] Post created successfully:", response.data);
-
       // Let listeners (PostFeed) know to refresh
       window.dispatchEvent(new CustomEvent("posts:refresh"));
       handleClose();
     } catch (err) {
-      console.error("❌ [CREATE POST] Error creating post:", err);
-      console.error("❌ [CREATE POST] Error details:", {
-        message: err.message,
-        status: err.response?.status,
-        statusText: err.response?.statusText,
-        data: err.response?.data
-      });
       alert(`Failed to create post: ${err.response?.data?.message || err.message || "Unknown error"}`);
     } finally {
       setSubmitting(false);

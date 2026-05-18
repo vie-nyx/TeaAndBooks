@@ -17,8 +17,7 @@ const transporter = nodemailer.createTransport({
     subject: options.subject,
     html: options.html
   };
-  console.log(process.env.EMAIL_USER);
-  console.log(process.env.EMAIL_PASS);
+
   await transporter.sendMail(mailOptions);
 };
 

@@ -50,8 +50,6 @@ UPDATE GOAL
 exports.updateGoal = async (req, res) => {
     try {
       const goalId = req.params.goalId;
-      console.log("SETTING ACTIVE:", goalId);
-  
       const goal = await GroupGoal.findById(goalId);
       if (!goal) {
         return res.status(404).json({ message: "Goal not found" });
@@ -84,7 +82,6 @@ exports.updateGoal = async (req, res) => {
       res.json(updated);
   
     } catch (err) {
-      console.error("Update goal error:", err);
       res.status(500).json({ message: err.message });
     }
   };
