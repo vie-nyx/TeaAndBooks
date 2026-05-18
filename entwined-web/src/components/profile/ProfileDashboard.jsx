@@ -357,6 +357,15 @@ export default function ProfileDashboard({
     }
   };
 
+  const handleLogout = () => {
+  logout();
+
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+
+  navigate("/", { replace: true });
+};
+
   if (loading) {
     return (
       <div className="dashboard-card">
@@ -412,6 +421,7 @@ export default function ProfileDashboard({
         setDraftProfile={setDraftProfile}
         onDeleteAccountClick={() => setShowDeleteModal(true)}
         deleteAccountLoading={deleteAccountLoading}
+        onLogout={handleLogout}
       />
 
       {feedback && (

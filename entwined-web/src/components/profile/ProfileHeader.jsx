@@ -10,8 +10,11 @@ export default function ProfileHeader({
   setDraftProfile,
   onDeleteAccountClick,
   deleteAccountLoading,
+  onLogout,
 }) {
-  const resolvedImage = profile.profileImage || "https://ui-avatars.com/api/?name=Reader&background=1f2937&color=ffffff";
+  const resolvedImage =
+    profile.profileImage ||
+    "https://ui-avatars.com/api/?name=Reader&background=1f2937&color=ffffff";
   const safeBio = profile.bio || "No bio added yet";
   const safePersona = profile.readingPersona || "Reader";
   const safeGenres = (profile.favoriteGenres || []).filter(Boolean);
@@ -35,7 +38,9 @@ export default function ProfileHeader({
             <span>{safePersona}</span>
           </div>
           <div className="profile-genre-pills">
-            {safeGenres.length === 0 && <span className="genre-pill">Not specified</span>}
+            {safeGenres.length === 0 && (
+              <span className="genre-pill">Not specified</span>
+            )}
             {safeGenres.map((genre) => (
               <span key={genre} className="genre-pill">
                 {genre}
@@ -49,12 +54,12 @@ export default function ProfileHeader({
         {isCurrentUser ? (
           <>
             <button
-  type="button"
-  className="edit-profile-btn"
-  onClick={onEditToggle}
->
-  {editing ? "Cancel" : "Edit Profile"}
-</button>
+              type="button"
+              className="edit-profile-btn"
+              onClick={onEditToggle}
+            >
+              {editing ? "Cancel" : "Edit Profile"}
+            </button>
             {editing && (
               <button type="button" onClick={onSaveProfile}>
                 Save
@@ -70,6 +75,13 @@ export default function ProfileHeader({
                 {deleteAccountLoading ? "Deleting..." : "Delete Account"}
               </button>
             </div>
+            <button
+              type="button"
+              className="edit-profile-btn logout-btn"
+              onClick={onLogout}
+            >
+              Logout
+            </button>
           </>
         ) : (
           <button type="button" onClick={onFollowToggle}>
@@ -84,14 +96,20 @@ export default function ProfileHeader({
             placeholder="Profile image URL"
             value={draftProfile.profileImage}
             onChange={(e) =>
-              setDraftProfile((prev) => ({ ...prev, profileImage: e.target.value }))
+              setDraftProfile((prev) => ({
+                ...prev,
+                profileImage: e.target.value,
+              }))
             }
           />
           <input
             placeholder="Reading persona"
             value={draftProfile.readingPersona}
             onChange={(e) =>
-              setDraftProfile((prev) => ({ ...prev, readingPersona: e.target.value }))
+              setDraftProfile((prev) => ({
+                ...prev,
+                readingPersona: e.target.value,
+              }))
             }
           />
           <textarea
@@ -105,7 +123,10 @@ export default function ProfileHeader({
             placeholder="Favorite genres (comma separated)"
             value={draftProfile.favoriteGenres}
             onChange={(e) =>
-              setDraftProfile((prev) => ({ ...prev, favoriteGenres: e.target.value }))
+              setDraftProfile((prev) => ({
+                ...prev,
+                favoriteGenres: e.target.value,
+              }))
             }
           />
         </div>
