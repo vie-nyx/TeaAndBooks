@@ -208,7 +208,7 @@ export default function Dashboard() {
         {activeTab === "chat" && <Chat />}
 
         {activeTab === "feed" && (
-          <div className="feed-layout">
+          <div className="feed-layout feed-layout-wide">
             <PostFeed />
             <CreatePost />
           </div>

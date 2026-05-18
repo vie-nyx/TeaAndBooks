@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../api/api";
 import { POST_CREATION_CATEGORIES } from "../constants/postCategories";
 
@@ -37,6 +37,17 @@ export default function CreatePost() {
     setOpen(false);
     resetState();
   };
+
+  useEffect(() => {
+    const openComposer = () => {
+      setOpen(true);
+    };
+
+    window.addEventListener("posts:openComposer", openComposer);
+    return () => {
+      window.removeEventListener("posts:openComposer", openComposer);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

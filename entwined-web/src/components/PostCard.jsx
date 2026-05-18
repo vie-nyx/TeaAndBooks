@@ -134,6 +134,15 @@ export default function PostCard({ post, onUpdated }) {
       <div className="post-body">
         {caption && <div className="post-caption">{caption}</div>}
 
+        <div className="post-stats-row">
+          <span className="likes-count">
+            {(optimisticPost.likes || []).length} likes
+          </span>
+          <span className="post-comments-count">
+            {(optimisticPost.comments || []).length} comments
+          </span>
+        </div>
+
         <div className="post-actions">
           <button
             type="button"
@@ -141,18 +150,15 @@ export default function PostCard({ post, onUpdated }) {
             onClick={handleLike}
             disabled={liking}
           >
-            <span>♥</span>
+            <span aria-hidden="true">♥</span>
             <span>{liking ? "..." : "Like"}</span>
           </button>
-          <span className="likes-count">
-            {(optimisticPost.likes || []).length} likes
-          </span>
           <button
             type="button"
             className="post-action-secondary"
             onClick={() => setShowComments((prev) => !prev)}
           >
-            {(optimisticPost.comments || []).length} comments
+            Comment
           </button>
           <button
             type="button"
