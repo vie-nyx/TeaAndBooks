@@ -3,12 +3,14 @@ const {
   signup,
   login,
   verifyEmail,
+  resendVerification,
   forgotPassword,
   resetPassword,
   refreshTokenHandler,
   logout,
   logoutAll,
-  googleLogin
+  googleLogin,
+  verifyToken
 } = require("../controllers/authController");
 const rateLimit = require("express-rate-limit");
 
@@ -26,6 +28,8 @@ const router = express.Router();
 router.post("/signup", signup);
 router.post("/login", limiter, login);
 router.post("/google", googleLogin);
+router.post("/resend-verification", resendVerification);
+router.get("/verify", authMiddleware, verifyToken);
 router.get("/verify-email/:token", verifyEmail);
 
 router.post("/forgot-password", forgotPassword);

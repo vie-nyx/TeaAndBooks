@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../api/api";
+import { POST_CREATION_CATEGORIES } from "../constants/postCategories";
 
 export default function CreatePost() {
   const [open, setOpen] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [caption, setCaption] = useState("");
+  const [category, setCategory] = useState("general");
   const [submitting, setSubmitting] = useState(false);
 
   const handleFileChange = (e) => {
@@ -27,6 +29,7 @@ export default function CreatePost() {
     setImageFile(null);
     setImagePreview(null);
     setCaption("");
+    setCategory("general");
   };
 
   const handleClose = () => {
@@ -35,27 +38,28 @@ export default function CreatePost() {
     resetState();
   };
 
+  useEffect(() => {
+    const openComposer = () => {
+      setOpen(true);
+    };
+
+    window.addEventListener("posts:openComposer", openComposer);
+    return () => {
+      window.removeEventListener("posts:openComposer", openComposer);
+    };
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!imageFile) {
       alert("Please choose an image");
       return;
     }
 
-    // Check token before sending request
     const token = localStorage.getItem("token");
-    console.log("📝 [CREATE POST] Preparing to create post:", {
-      hasImageFile: !!imageFile,
-      imageFileName: imageFile.name,
-      imageFileSize: imageFile.size,
-      captionLength: caption.length,
-      hasToken: !!token,
-      tokenType: typeof token,
-      tokenValue: token === "undefined" || token === "null" ? token : (token ? token.substring(0, 30) + "..." : "null")
-    });
 
     if (!token || token === "undefined" || token === "null") {
-      console.error("❌ [CREATE POST] No valid token found!");
       alert("You are not logged in. Please log in again.");
       return;
     }
@@ -64,39 +68,30 @@ export default function CreatePost() {
     try {
       const formData = new FormData();
       formData.append("image", imageFile);
+      formData.append("category", category);
+
       if (caption.trim()) {
         formData.append("caption", caption.trim());
       }
 
-      console.log("📤 [CREATE POST] Sending request to /api/posts/create");
-      console.log("📤 [CREATE POST] FormData entries:", {
-        hasImage: formData.has("image"),
-        hasCaption: formData.has("caption"),
-        captionValue: caption.trim()
-      });
-
-      const response = await api.post("/api/posts/create", formData, {
-        headers: { 
+      await api.post("/api/posts/create", formData, {
+        headers: {
           "Content-Type": "multipart/form-data",
-          // Explicitly ensure Authorization header is preserved
           Authorization: `Bearer ${token}`
-        },
+        }
       });
 
-      console.log("✅ [CREATE POST] Post created successfully:", response.data);
-
-      // Let listeners (PostFeed) know to refresh
       window.dispatchEvent(new CustomEvent("posts:refresh"));
       handleClose();
     } catch (err) {
-      console.error("❌ [CREATE POST] Error creating post:", err);
-      console.error("❌ [CREATE POST] Error details:", {
-        message: err.message,
-        status: err.response?.status,
-        statusText: err.response?.statusText,
-        data: err.response?.data
-      });
-      alert(`Failed to create post: ${err.response?.data?.message || err.message || "Unknown error"}`);
+      alert(
+        `Failed to create post: ${
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message ||
+          "Unknown error"
+        }`
+      );
     } finally {
       setSubmitting(false);
     }
@@ -123,7 +118,7 @@ export default function CreatePost() {
                 className="create-post-close"
                 onClick={handleClose}
               >
-                ×
+                x
               </button>
             </div>
             <form className="create-post-body" onSubmit={handleSubmit}>
@@ -139,6 +134,24 @@ export default function CreatePost() {
                 </span>
               </label>
 
+              <div className="create-post-field-grid">
+                <label className="create-post-field">
+                  <span>Category</span>
+                  <select
+                    className="create-post-select"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    disabled={submitting}
+                  >
+                    {POST_CREATION_CATEGORIES.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
               {imagePreview && (
                 <div className="create-post-preview">
                   <img src={imagePreview} alt="Post preview" />
@@ -147,12 +160,17 @@ export default function CreatePost() {
 
               <textarea
                 className="create-post-caption"
-                placeholder="Write a dreamy caption..."
+                placeholder="Share a thought, mini review, quote, or reading update..."
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
                 maxLength={2200}
                 disabled={submitting}
               />
+
+              <div className="create-post-caption-meta">
+                <span>Pick a category so the right readers can find this post faster.</span>
+                <span>{caption.length}/2200</span>
+              </div>
 
               <div className="create-post-actions">
                 <button
@@ -178,5 +196,3 @@ export default function CreatePost() {
     </>
   );
 }
-
-

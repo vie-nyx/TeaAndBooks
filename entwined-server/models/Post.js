@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { POST_CATEGORIES } = require("../constants/postCategories");
 
 const postSchema = new mongoose.Schema(
 {
@@ -12,6 +13,13 @@ const postSchema = new mongoose.Schema(
     type: String,
     trim: true,
     default: ""
+  },
+
+  category: {
+    type: String,
+    enum: POST_CATEGORIES,
+    default: "general",
+    index: true
   },
 
   imageUrl: {
@@ -38,5 +46,6 @@ const postSchema = new mongoose.Schema(
 
 postSchema.index({ user: 1, createdAt: -1 });
 postSchema.index({ createdAt: -1 });
+postSchema.index({ category: 1, createdAt: -1 });
 
 module.exports = mongoose.model("Post", postSchema);

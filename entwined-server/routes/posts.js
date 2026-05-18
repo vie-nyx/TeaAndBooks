@@ -5,6 +5,7 @@ const Post = require("../models/Post");
 const User = require("../models/User");
 const Comment = require("../models/Comments");
 const PostLike = require("../models/PostLike");
+const { POST_CATEGORIES } = require("../constants/postCategories");
 
 const { uploadImage } = require("../middleware/upload");
 
@@ -13,6 +14,17 @@ const bucket = require("../config/firebase");
 // Use relaxed auth here so both classic and Google JWTs work,
 // without changing existing strict authMiddleware behavior.
 const auth = require("../middleware/authRelaxed");
+
+const normalizeCategory = (value) => {
+  if (!value || typeof value !== "string") {
+    return "general";
+  }
+
+  const normalizedValue = value.trim().toLowerCase();
+  return POST_CATEGORIES.includes(normalizedValue)
+    ? normalizedValue
+    : null;
+};
 
 
 
@@ -41,12 +53,18 @@ router.post("/create", auth, uploadImage.single("image"), async (req, res) => {
 
     // Cloudinary automatically uploads the file
     const imageUrl = req.file.path;
+    const category = normalizeCategory(req.body.category);
+
+    if (!category) {
+      return res.status(400).json({ message: "Invalid post category" });
+    }
 
     console.log("Cloudinary image URL:", imageUrl);
 
     const post = await Post.create({
       user: req.userId,
       caption: req.body.caption || "",
+      category,
       imageUrl
     });
 
@@ -77,7 +95,28 @@ router.get("/feed", auth, async (req, res) => {
     console.log("===== FETCH FEED =====");
     console.log("User requesting feed:", req.userId);
 
-    const posts = await Post.find()
+    const category = req.query.category?.toString().trim().toLowerCase();
+    const search = req.query.search?.toString().trim().toLowerCase() || "";
+
+    if (category && category !== "all" && !POST_CATEGORIES.includes(category)) {
+      return res.status(400).json({ message: "Invalid category filter" });
+    }
+
+    const query = {};
+
+    if (category && category !== "all") {
+      query.category = category;
+
+      if (category === "general") {
+        delete query.category;
+        query.$or = [
+          { category: "general" },
+          { category: { $exists: false } }
+        ];
+      }
+    }
+
+    const posts = await Post.find(query)
       .populate("user", "username profileImage")
       .populate({
         path: "comments",
@@ -85,9 +124,24 @@ router.get("/feed", auth, async (req, res) => {
       })
       .sort({ createdAt: -1 });
 
-    console.log("Total posts fetched:", posts.length);
+    const filteredPosts = search
+      ? posts.filter((post) => {
+          const searchableText = [
+            post.caption,
+            post.category,
+            post.user?.username
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
 
-    res.json(posts);
+          return searchableText.includes(search);
+        })
+      : posts;
+
+    console.log("Total posts fetched:", filteredPosts.length);
+
+    res.json(filteredPosts);
 
   } catch (err) {
     console.error("Feed fetch error:", err);
