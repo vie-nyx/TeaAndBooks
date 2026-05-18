@@ -99,8 +99,6 @@ export default function ProfileDashboard({
         `/api/profile/${finalUserId}`
       );
 
-      console.log("[ProfileDashboard] profile response:", profileRes.data);
-
       setProfile(profileRes.data.profile);
       setIsCurrentUser(profileRes.data.isCurrentUser);
       setIsFollowing(profileRes.data.isFollowing);
@@ -123,8 +121,6 @@ export default function ProfileDashboard({
 
       setEntries(journalRes.data || []);
     } catch (err) {
-      console.error("Failed to load profile dashboard", err);
-
       setError(
         err.response?.data?.message ||
           "Failed to load profile. Please try again."
@@ -165,8 +161,8 @@ export default function ProfileDashboard({
             }
           : prev
       );
-    } catch (err) {
-      console.error("Failed to follow/unfollow", err);
+    } catch {
+      // Failed to follow/unfollow
     }
   };
 
@@ -195,8 +191,6 @@ export default function ProfileDashboard({
 
       await verifyAndFetchUser();
     } catch (err) {
-      console.error("Failed to save profile", err);
-
       setFeedback(
         err.response?.data?.message || "Failed to save profile."
       );
@@ -231,8 +225,8 @@ export default function ProfileDashboard({
         author: "",
         shelf: "wantToRead",
       });
-    } catch (err) {
-      console.error("Failed to add book", err);
+    } catch {
+      // Failed to add book
     }
   };
 
@@ -256,8 +250,8 @@ export default function ProfileDashboard({
             }
           : prev
       );
-    } catch (err) {
-      console.error("Failed to move book", err);
+    } catch {
+      // Failed to move book
     }
   };
 
@@ -277,8 +271,8 @@ export default function ProfileDashboard({
             }
           : prev
       );
-    } catch (err) {
-      console.error("Failed to remove book", err);
+    } catch {
+      // Failed to remove book
     }
   };
 
@@ -307,8 +301,8 @@ export default function ProfileDashboard({
         content: "",
         rating: 4,
       });
-    } catch (err) {
-      console.error("Failed to create review", err);
+    } catch {
+      // Failed to create review
     }
   };
 
@@ -334,8 +328,8 @@ export default function ProfileDashboard({
         moodTags: "",
         isPublic: false,
       });
-    } catch (err) {
-      console.error("Failed to create journal entry", err);
+    } catch {
+      // Failed to create journal entry
     }
   };
 
@@ -350,7 +344,6 @@ export default function ProfileDashboard({
       setShowDeleteModal(false);
       navigate("/", { replace: true });
     } catch (err) {
-      console.error("Failed to delete account", err);
       setFeedback(err.response?.data?.message || "Failed to delete account. Please try again.");
     } finally {
       setDeleteAccountLoading(false);

@@ -48,7 +48,7 @@ export default function Dashboard() {
           }
           return;
         } catch (err) {
-          console.log(err);
+          // Failed to parse stored user
         }
       }
 
@@ -64,7 +64,7 @@ export default function Dashboard() {
           setCurrentUser(res.data.user || res.data);
         }
       } catch (err) {
-        console.error("Failed to load current user", err);
+        // Failed to load current user
       }
     };
 
@@ -85,7 +85,7 @@ export default function Dashboard() {
       setIncoming(inRes.data);
       setOutgoing(outRes.data);
     } catch (err) {
-      console.error("Failed to fetch requests", err);
+      // Failed to fetch friend requests
     }
   }, []);
   useEffect(() => {
@@ -102,7 +102,7 @@ export default function Dashboard() {
       const res = await api.get("/api/friends/list");
       setFriends(res.data);
     } catch (err) {
-      console.error("Failed to fetch friends", err);
+      // Failed to fetch friends list
     }
   }, []);
 
@@ -125,7 +125,7 @@ export default function Dashboard() {
         )
       );
     } catch (err) {
-      console.log(err);
+      // Search failed
     }
   };
 
@@ -135,7 +135,7 @@ export default function Dashboard() {
       alert("Request sent");
       fetchRequests();
     } catch (err) {
-      console.log(err);
+      // Failed to send friend request
     }
   };
 
@@ -145,7 +145,7 @@ export default function Dashboard() {
       fetchRequests();
       fetchFriends();
     } catch (err) {
-      console.log(err);
+      // Failed to accept friend request
     }
   };
 

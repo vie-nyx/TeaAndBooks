@@ -1,15 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-
-const SocketContext = createContext(null);
-
-export const useSocket = () => {
-  const context = useContext(SocketContext);
-  if (!context) {
-    throw new Error("useSocket must be used within SocketProvider");
-  }
-  return context;
-};
+import { SocketContext } from "./SocketContextValue";
 
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
@@ -29,16 +20,14 @@ export const SocketProvider = ({ children }) => {
 
     newSocket.on("connect", () => {
       setIsConnected(true);
-      console.log("Socket connected");
     });
 
     newSocket.on("disconnect", () => {
       setIsConnected(false);
-      console.log("Socket disconnected");
     });
 
-    newSocket.on("error", (error) => {
-      console.error("Socket error:", error);
+    newSocket.on("error", () => {
+      // Socket error occurred
     });
 
     setSocket(newSocket);

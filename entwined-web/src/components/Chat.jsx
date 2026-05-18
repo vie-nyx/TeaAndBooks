@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import api from "../api/api";
-import { useSocket } from "../contexts/SocketContext";
+import { useSocket } from "../hooks/useSocket";
 import { useAuth } from "../contexts/AuthContext";
 import "../styles/Chat.css";
 import GroupGoals from "../components/group/GroupGoals";
@@ -47,7 +47,7 @@ export default function Chat() {
         });
       }
     };
-  }, [selectedConversation]);
+  }, [socket, selectedConversation, joinConversation]);
 
   useEffect(() => {
     if (!socket) return;
@@ -67,42 +67,42 @@ export default function Chat() {
       socket.off("user:online");
       socket.off("user:offline");
     };
-  }, [socket, selectedConversation]);
+  }, [socket, selectedConversation, handleMessageNotification, handleNewMessage, handleTypingStart, handleTypingStop]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  const fetchConversations = async () => {
+  const fetchConversations = useCallback(async () => {
     try {
       const res = await api.get("/api/chat/conversations");
       setConversations(res.data);
-    } catch (err) {
-      console.error("Error fetching conversations:", err);
+    } catch {
+      // Error fetching conversations
     }
-  };
+  }, []);
 
-  const fetchFriends = async () => {
+  const fetchFriends = useCallback(async () => {
     try {
       const res = await api.get("/api/friends/list");
       setFriends(res.data);
-    } catch (err) {
-      console.error("Error fetching friends:", err);
+    } catch {
+      // Error fetching friends
     }
-  };
+  }, []);
 
-  const fetchMessages = async (conversationId) => {
+  const fetchMessages = useCallback(async (conversationId) => {
     try {
       const res = await api.get(
         `/api/chat/conversation/${conversationId}/messages`,
       );
       setMessages(res.data);
-    } catch (err) {
-      console.error("Error fetching messages:", err);
+    } catch {
+      // Error fetching messages
     }
-  };
+  }, []);
 
-  const joinConversation = (conversationId) => {
+  const joinConversation = useCallback((conversationId) => {
     if (socket && selectedConversation) {
       socket.emit("conversation:leave", {
         conversationId: selectedConversation._id,
@@ -111,9 +111,9 @@ export default function Chat() {
     if (socket && conversationId) {
       socket.emit("conversation:join", { conversationId });
     }
-  };
+  }, [socket, selectedConversation]);
 
-  const handleNewMessage = (message) => {
+  const handleNewMessage = useCallback((message) => {
     if (
       selectedConversation &&
       message.conversationId === selectedConversation._id
@@ -121,20 +121,19 @@ export default function Chat() {
       setMessages((prev) => [...prev, message]);
     }
     fetchConversations(); // Update conversation list
-  };
+  }, [selectedConversation, fetchConversations]);
 
-  const handleMessageNotification = ({ conversationId, message }) => {
-    console.log("Message notification received:", conversationId, message);
+  const handleMessageNotification = useCallback(() => {
     fetchConversations(); // Update conversation list
-  };
+  }, [fetchConversations]);
 
-  const handleTypingStart = ({ conversationId, userId }) => {
+  const handleTypingStart = useCallback(({ conversationId, userId }) => {
     if (selectedConversation && conversationId === selectedConversation._id) {
       setTypingUsers((prev) => new Set([...prev, userId]));
     }
-  };
+  }, [selectedConversation]);
 
-  const handleTypingStop = ({ conversationId, userId }) => {
+  const handleTypingStop = useCallback(({ conversationId, userId }) => {
     if (selectedConversation && conversationId === selectedConversation._id) {
       setTypingUsers((prev) => {
         const newSet = new Set(prev);
@@ -142,16 +141,14 @@ export default function Chat() {
         return newSet;
       });
     }
-  };
+  }, [selectedConversation]);
 
-  const handleUserOnline = ({ userId }) => {
+  const handleUserOnline = () => {
     // Update online status if needed
-    console.log("User online:", userId);
   };
 
-  const handleUserOffline = ({ userId }) => {
+  const handleUserOffline = () => {
     // Update offline status if needed
-    console.log("User offline:", userId);
   };
 
   const handleSendMessage = async (e) => {
@@ -169,8 +166,8 @@ export default function Chat() {
 
       setMessageText("");
       stopTyping();
-    } catch (err) {
-      console.error("Error sending message:", err);
+    } catch {
+      // Error sending message
     }
   };
 
@@ -221,18 +218,8 @@ export default function Chat() {
       formData.append("conversationId", selectedConversation._id);
       formData.append("file", previewFile.file);
 
-      console.log(
-        "Uploading file:",
-        previewFile.name,
-        "Size:",
-        previewFile.size,
-      );
-      console.log("Conversation ID:", selectedConversation._id);
-
       // Don't set Content-Type header - browser will set it with boundary
-      const response = await api.post("/api/chat/message", formData);
-
-      console.log("File uploaded successfully:", response.data);
+      await api.post("/api/chat/message", formData);
 
       setPreviewFile(null);
       fileInputRef.current.value = "";
@@ -242,8 +229,6 @@ export default function Chat() {
         fetchMessages(selectedConversation._id);
       }
     } catch (err) {
-      console.error("Error uploading file:", err);
-      console.error("Error response:", err.response?.data);
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
@@ -279,8 +264,8 @@ export default function Chat() {
       document.body.removeChild(link);
 
       URL.revokeObjectURL(link.href);
-    } catch (err) {
-      console.error("Download failed:", err);
+    } catch {
+      // Download failed
     }
   };
 
@@ -316,33 +301,22 @@ export default function Chat() {
         friendId: friend._id,
       });
       setSelectedConversation(res.data);
-    } catch (err) {
-      console.error("Error creating conversation:", err);
+    } catch {
+      // Error creating conversation
     }
   };
 
   const handleCreateGroup = async () => {
-    console.log("Create button clicked");
-
     if (!groupName.trim() || selectedFriends.length === 0) {
-      console.log("Validation failed", { groupName, selectedFriends });
       return;
     }
 
     try {
-      console.log("Sending request...", {
-        groupName,
-        selectedFriends,
-        groupType,
-      });
-
       const res = await api.post("/api/chat/conversation/group", {
         groupName,
         friendIds: selectedFriends.map((f) => f._id),
         groupType,
       });
-
-      console.log("Response:", res.data);
 
       setConversations((prev) => [res.data, ...prev]);
       setSelectedConversation(res.data);
@@ -350,9 +324,8 @@ export default function Chat() {
       setGroupName("");
       setSelectedFriends([]);
       setGroupType("discussion");
-    } catch (err) {
-      console.error("Error creating group:", err);
-      console.error("Error response:", err.response?.data);
+    } catch {
+      // Error creating group
     }
   };
   const toggleFriendSelection = (friend) => {
@@ -379,7 +352,6 @@ export default function Chat() {
   };
 
   const isBookClub = selectedConversation?.groupType === "bookclub";
-  console.log("Selected Conversation:", selectedConversation);
   return (
     <div className="chat-container">
       {(mobileView === "list" || window.innerWidth > 768) && (
