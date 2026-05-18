@@ -38,7 +38,7 @@
 
 .tab-button.active {
   color: #2563eb;
-  border-bottom-color: #2563eb;
+  border-bottom-color: #8b5cf6;
 }
 
 .dashboard-card {
@@ -1045,7 +1045,7 @@
 
 .tab-button.active {
   color: #0f172a;
-  border-bottom: 4px solid #2563eb;
+  border-bottom: 4px solid #8b5cf6;
   background-color: rgba(37, 99, 235, 0.08);
 }
 
