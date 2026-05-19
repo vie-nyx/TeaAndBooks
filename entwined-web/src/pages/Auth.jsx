@@ -295,17 +295,17 @@ export default function Auth() {
         </div>
 
         <div
-          className="auth-switch"
-          onClick={() => {
-            setIsSignup(!isSignup);
-            setError("");
-            setShowResend(false);
-          }}
-        >
-          {isSignup
-            ? "Already have an account? Login"
-            : "Don't have an account? Sign Up"}
-        </div>
+  className="auth-switch transition-all duration-300 hover:text-purple-500 hover:underline cursor-pointer"
+  onClick={() => {
+    setIsSignup(!isSignup);
+    setError("");
+    setShowResend(false);
+  }}
+>
+  {isSignup
+    ? "Already have an account? Login"
+    : "Don't have an account? Sign Up"}
+</div>
 
       </div>
     </div>

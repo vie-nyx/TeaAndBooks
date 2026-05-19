@@ -151,3 +151,8 @@
   color: #64748b;
   cursor: pointer;
 }
+.auth-switch:hover {
+  color: #a855f7;
+  text-decoration: underline;
+  transition: all 0.3s ease;
+}
