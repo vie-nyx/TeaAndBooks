@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 export default function ProfileHeader({
   profile,
   isCurrentUser,
@@ -15,6 +17,24 @@ export default function ProfileHeader({
   const safeBio = profile.bio || "No bio added yet";
   const safePersona = profile.readingPersona || "Reader";
   const safeGenres = (profile.favoriteGenres || []).filter(Boolean);
+
+  useEffect(() => {
+    if (!editing) return undefined;
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        onEditToggle();
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [editing, onEditToggle]);
 
   return (
     <div className="profile-header-card">
@@ -48,6 +68,11 @@ export default function ProfileHeader({
       <div className="profile-header-actions">
         {isCurrentUser ? (
           <>
+          
+            <button type="button" onClick={onEditToggle}>
+              {editing ? "Cancel" : "Edit Profile"}
+            </button>
+        
             <button
   type="button"
   className="edit-profile-btn"
@@ -79,35 +104,64 @@ export default function ProfileHeader({
       </div>
 
       {isCurrentUser && editing && (
-        <div className="profile-edit-grid">
-          <input
-            placeholder="Profile image URL"
-            value={draftProfile.profileImage}
-            onChange={(e) =>
-              setDraftProfile((prev) => ({ ...prev, profileImage: e.target.value }))
-            }
-          />
-          <input
-            placeholder="Reading persona"
-            value={draftProfile.readingPersona}
-            onChange={(e) =>
-              setDraftProfile((prev) => ({ ...prev, readingPersona: e.target.value }))
-            }
-          />
-          <textarea
-            placeholder="Bio"
-            value={draftProfile.bio}
-            onChange={(e) =>
-              setDraftProfile((prev) => ({ ...prev, bio: e.target.value }))
-            }
-          />
-          <input
-            placeholder="Favorite genres (comma separated)"
-            value={draftProfile.favoriteGenres}
-            onChange={(e) =>
-              setDraftProfile((prev) => ({ ...prev, favoriteGenres: e.target.value }))
-            }
-          />
+         <div className="profile-edit-modal-overlay" onClick={onEditToggle}>
+          <div
+            className="profile-edit-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edit-profile-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="profile-edit-modal-header">
+              <h3 id="edit-profile-title">Edit Profile</h3>
+              <button
+                type="button"
+                className="profile-edit-close"
+                onClick={onEditToggle}
+                aria-label="Close edit profile"
+              >
+                ×
+              </button>
+            </div>
+            <div className="profile-edit-grid">
+              <input
+                placeholder="Profile image URL"
+                value={draftProfile.profileImage}
+                onChange={(e) =>
+                  setDraftProfile((prev) => ({ ...prev, profileImage: e.target.value }))
+                }
+              />
+              <input
+                placeholder="Reading persona"
+                value={draftProfile.readingPersona}
+                onChange={(e) =>
+                  setDraftProfile((prev) => ({ ...prev, readingPersona: e.target.value }))
+                }
+              />
+              <textarea
+                placeholder="Bio"
+                value={draftProfile.bio}
+                onChange={(e) =>
+                  setDraftProfile((prev) => ({ ...prev, bio: e.target.value }))
+                }
+              />
+              <input
+                placeholder="Favorite genres (comma separated)"
+                value={draftProfile.favoriteGenres}
+                onChange={(e) =>
+                  setDraftProfile((prev) => ({ ...prev, favoriteGenres: e.target.value }))
+                }
+              />
+            </div>
+            <div className="profile-edit-modal-actions">
+              <button type="button" className="profile-edit-cancel" onClick={onEditToggle}>
+                Cancel
+              </button>
+              <button type="button" onClick={onSaveProfile}>
+                Save Changes
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
