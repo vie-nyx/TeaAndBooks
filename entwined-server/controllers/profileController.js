@@ -6,6 +6,13 @@ const SharedPost = require("../models/SharedPost");
 const Review = require("../models/Review");
 const Conversation = require("../models/Conversation");
 
+const Library = require("../models/Library");
+const JournalEntry = require("../models/JournalEntry");
+const FriendRequest = require("../models/FriendRequest");
+const Friendship = require("../models/Friendship");
+const Message = require("../models/Message");
+const GroupGoal = require("../models/GroupGoal");
+
 const pickProfileFields = (user) => ({
   _id: user._id,
   username: user.username,
@@ -155,6 +162,59 @@ const getSuggestedUsers = async (req, res) => {
   }
 };
 
+
+const deleteMyAccount = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const myPosts = await Post.find({ user: userId }).select("_id");
+    const postIds = myPosts.map((post) => post._id);
+
+    await Promise.all([
+      User.updateMany({ followers: userId }, { $pull: { followers: userId } }),
+      User.updateMany({ following: userId }, { $pull: { following: userId } }),
+      User.updateMany({ posts: { $in: postIds } }, { $pull: { posts: { $in: postIds } } }),
+      Post.updateMany({ user: { $ne: userId } }, { $pull: { likes: userId } }),
+      postIds.length ? Post.updateMany({ _id: { $nin: postIds } }, { $pull: { comments: { $in: await Comment.find({ user: userId }).distinct("_id") } } }) : Promise.resolve(),
+      PostLike.deleteMany({ user: userId }),
+      Comment.deleteMany({ user: userId }),
+      Review.deleteMany({ user: userId }),
+      JournalEntry.deleteMany({ user: userId }),
+      Library.deleteOne({ user: userId }),
+      FriendRequest.deleteMany({ $or: [{ sender: userId }, { receiver: userId }] }),
+      Friendship.deleteMany({ users: userId }),
+      SharedPost.deleteMany({ sharedBy: userId }),
+      GroupGoal.deleteMany({ createdBy: userId }),
+      Message.deleteMany({ sender: userId }),
+      Conversation.updateMany(
+        { participants: userId },
+        {
+          $pull: { participants: userId, admins: userId },
+          $unset: { lastMessage: "" },
+          $set: { lastMessageAt: new Date() },
+        }
+      ),
+      Conversation.deleteMany({ participants: { $size: 0 } }),
+    ]);
+
+    if (postIds.length) {
+      await Promise.all([
+        SharedPost.deleteMany({ post: { $in: postIds } }),
+        PostLike.deleteMany({ post: { $in: postIds } }),
+        Comment.deleteMany({ post: { $in: postIds } }),
+        Message.deleteMany({ postId: { $in: postIds } }),
+        Post.deleteMany({ _id: { $in: postIds } }),
+      ]);
+    }
+
+    await User.findByIdAndDelete(userId);
+
+    return res.json({ message: "Account deleted successfully" });
+  } catch (err) {
+    return res.status(500).json({ message: err.message || "Failed to delete account" });
+  }
+};
+
+
 const getUserContent = async (req, res) => {
   try {
     const target = req.params.userId === "me" ? req.userId : req.params.userId;
@@ -200,4 +260,5 @@ module.exports = {
   getFollowing,
   getSuggestedUsers,
   getUserContent,
+  deleteMyAccount,
 };

@@ -287,10 +287,12 @@ export default function Auth() {
 
         <div className="auth-divider">or continue with</div>
 
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          onError={() => setError("Google login failed")}
-        />
+        <div className="google-btn-wrapper">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError("Google login failed")}
+          />
+        </div>
 
         <div
           className="auth-switch"

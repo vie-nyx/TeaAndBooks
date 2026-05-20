@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/api";
 import { useAuth } from "../../contexts/AuthContext";
 import PostCard from "../PostCard";
@@ -21,7 +22,8 @@ const tabs = [
 export default function ProfileDashboard({
   userId: propUserId,
 }) {
-  const { user, verifyAndFetchUser } = useAuth();
+  const { user, verifyAndFetchUser, logout } = useAuth();
+  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("posts");
 
@@ -79,6 +81,8 @@ export default function ProfileDashboard({
     isPublic: false,
   });
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteAccountLoading, setDeleteAccountLoading] = useState(false);
 
   const finalUserId =
   propUserId === "me"
@@ -335,6 +339,24 @@ export default function ProfileDashboard({
     }
   };
 
+  const handleDeleteAccount = async () => {
+    setDeleteAccountLoading(true);
+    setFeedback("");
+
+    try {
+      await api.delete("/api/profile/me");
+      logout();
+      localStorage.removeItem("token");
+      setShowDeleteModal(false);
+      navigate("/", { replace: true });
+    } catch (err) {
+      console.error("Failed to delete account", err);
+      setFeedback(err.response?.data?.message || "Failed to delete account. Please try again.");
+    } finally {
+      setDeleteAccountLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="dashboard-card">
@@ -388,6 +410,8 @@ export default function ProfileDashboard({
         }}
         draftProfile={draftProfile}
         setDraftProfile={setDraftProfile}
+        onDeleteAccountClick={() => setShowDeleteModal(true)}
+        deleteAccountLoading={deleteAccountLoading}
       />
 
       {feedback && (
@@ -484,6 +508,50 @@ export default function ProfileDashboard({
           isCurrentUser={isCurrentUser}
         />
       )}
+
+      {showDeleteModal && (
+        <div className="danger-modal-overlay" role="dialog" aria-modal="true">
+          <div className="danger-modal">
+            <button
+              type="button"
+              className="danger-modal-close"
+              aria-label="Close delete confirmation"
+              onClick={() => setShowDeleteModal(false)}
+              disabled={deleteAccountLoading}
+            >
+              ×
+            </button>
+
+            <div className="danger-modal-header">
+              <div className="danger-modal-icon" aria-hidden="true">⚠</div>
+              <div>
+                <h3>Delete Account</h3>
+                <span className="danger-modal-badge">This action is permanent</span>
+              </div>
+            </div>
+
+            <div className="danger-modal-divider" />
+
+            <p>
+               Are you sure you want to delete your account? Deleting your account will remove your profile and related data.
+            </p>
+            <div className="danger-modal-actions">
+              <button type="button" onClick={() => setShowDeleteModal(false)} disabled={deleteAccountLoading}>
+                Cancel
+              </button>
+              <button type="button" className="danger-button" onClick={handleDeleteAccount} disabled={deleteAccountLoading}>
+                {deleteAccountLoading ? "Deleting..." : "Yes, Delete My Account"}
+              </button>
+            </div>
+
+            <p className="danger-modal-footer" aria-live="polite">
+              <span aria-hidden="true">🔒</span>
+              Your data will be deleted permanently and cannot be recovered.
+            </p>
+          </div>
+        </div>
+      )}
+      
     </div>
   );
 }

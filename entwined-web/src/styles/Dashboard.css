@@ -683,7 +683,23 @@
 .profile-header-actions {
   margin-top: 12px;
   display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
   gap: 8px;
+}
+
+.profile-header-actions button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.profile-header-actions > button {
+  min-height: 42px;
 }
 
 .profile-edit-grid {
@@ -895,10 +911,10 @@
   color: #0f172a;
   padding: 10px;
 }
-
 .library-add-row button {
   background: #2563eb;
   color: #ffffff;
+
   border: none;
   cursor: pointer;
 }
@@ -909,7 +925,6 @@
 .activity-card,
 .club-card,
 .journal-card {
-  background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 12px;
@@ -917,6 +932,7 @@
 
 /* Journal — title */
 .journal-card h3 {
+  background: #ffffff;
   margin: 0 0 10px;
   font-size: 16px;
   font-weight: 600;
@@ -1269,9 +1285,9 @@
   border-radius: 12px;
   border: 1px solid #cbd5e1;
   background: #ffffff;
+  transition: all 0.2s ease;
   color: #0f172a;
   font-size: 14px;
-  transition: all 0.2s ease;
   box-sizing: border-box;
 }
 
@@ -1800,6 +1816,7 @@
 
   .profile-header-actions {
     margin-top: 14px;
+    flex-direction: column;
   }
 
   .profile-header-actions button {
@@ -1811,6 +1828,19 @@
     font-size: 14px;
   }
 
+  .danger-modal {
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .danger-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .danger-modal-actions button {
+    width: 100%;
+  }
+  
   /* STATS */
 
   .reading-stats-row {
@@ -1825,8 +1855,8 @@
     padding: 16px 10px;
 
     border-radius: 18px;
-
     font-size: 13px;
+
 
     line-height: 1.5;
 
@@ -1861,6 +1891,12 @@
     flex-shrink: 0;
   }
 }
+
+.edit-profile-btn {
+  height: 36px !important;
+  padding: 6px 12px;
+}
+
 /* =========================
    LIBRARY MOBILE FIX
 ========================= */
@@ -2056,4 +2092,177 @@
   max-width: 100%;
 
   overflow-x: hidden;
+}
+
+.delete-account-button {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fecaca !important;
+  box-shadow: none !important;
+}
+
+.delete-account-button:hover:not(:disabled) {
+  background: #fecaca !important;
+  color: #991b1b !important;
+  transform: none;
+}
+
+@media (max-width: 900px) {
+  .danger-modal {
+    width: min(100%, 460px);
+    padding: 18px;
+  }
+}
+.danger-button {
+  background: #ef4444 !important;
+  color: #fff !important;
+  border: 1px solid #ef4444 !important;
+  border-radius: 10px;
+  min-height: 40px;
+  padding: 10px 14px;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.18);
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.danger-button:hover:not(:disabled) {
+  background: #dc2626 !important;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.22);
+  transform: translateY(-1px);
+}
+
+.danger-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.32);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 2000;
+}
+
+.danger-modal {
+  position: relative;
+  width: min(100%, 560px);
+  max-height: min(92vh, 720px);
+  overflow-y: auto;
+  background: linear-gradient(180deg, #ffffff 0%, #fff7f7 100%);
+  color: #0f172a;
+  border: 1px solid #f1d7dd;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+}
+
+.danger-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid #f1d7dd;
+  background: #fff;
+  color: #475569;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.danger-modal-close:hover:not(:disabled) { background: #fff5f5; }
+
+.danger-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding-right: 36px;
+}
+
+.danger-modal-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #fde8ea;
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.danger-modal h3 {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.danger-modal-badge {
+  display: inline-flex;
+  margin-top: 8px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.danger-modal-divider {
+  height: 1px;
+  background: #f1d7dd;
+  margin: 16px 0;
+}
+
+.danger-modal p {
+  margin:0;
+  color: #475569;
+  line-height: 1.65;
+  font-size: 0.97rem;
+}
+
+.danger-modal-actions {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  }
+
+.danger-modal-actions button {
+  min-height: 44px;
+  padding: 0 15px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.danger-modal-actions button:first-child {
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+.danger-modal-actions button:first-child:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.danger-modal .danger-button {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  border-color: #dc2626 !important;
+}
+
+.danger-modal-footer {
+  margin-top: 12px !important;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.82rem !important;
+  color: #64748b !important;
+}
+
+@media (max-width: 900px) {
+  
+  .danger-modal {
+    width: min(100%, 460px);
+    padding: 18px;
+  }
 }

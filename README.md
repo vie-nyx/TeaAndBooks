@@ -10,6 +10,7 @@ For reference while testing friend-related features, search for users like:
 - becca
 
 ## Features
+---
 
 ### Authentication
 
@@ -77,9 +78,11 @@ For reference while testing friend-related features, search for users like:
 
 ---
 
+
 ## Folder Structure
 
 ```bash
+```txt
 TeaAndBooks/
 │
 ├── entwined-web/
@@ -117,8 +120,8 @@ TeaAndBooks/
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/entwined.git
-cd entwined
+git clone https://github.com/your-username/TeaAndBooks.git
+cd TeaAndBooks
 ```
 
 ---

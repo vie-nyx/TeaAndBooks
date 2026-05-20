@@ -10,6 +10,7 @@ router.get("/:userId/followers", auth, profileController.getFollowers);
 router.get("/:userId/following", auth, profileController.getFollowing);
 router.post("/:userId/follow", auth, profileController.toggleFollow);
 router.put("/me/update", auth, profileController.updateMyProfile);
+router.delete("/me", auth, profileController.deleteMyAccount);
 router.get("/:userId", auth, profileController.getUserProfile);
 
 module.exports = router;

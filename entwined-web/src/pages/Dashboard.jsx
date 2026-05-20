@@ -12,9 +12,9 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const profileId =
-  location.pathname.split(
-    "/dashboard/profile/"
-  )[1];
+    location.pathname.split(
+      "/dashboard/profile/"
+    )[1];
 
   const [activeTab, setActiveTab] = useState(
     location.pathname.includes(
@@ -29,9 +29,51 @@ export default function Dashboard() {
   const [incoming, setIncoming] = useState([]);
   const [outgoing, setOutgoing] = useState([]);
   const [friends, setFriends] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // 1. Sync activeTab with URL changes
- 
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadCurrentUser = async () => {
+      const storedUser = localStorage.getItem("user");
+
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+
+          if (isMounted) {
+            setCurrentUser(parsedUser.user || parsedUser);
+          }
+          return;
+        } catch (err) {
+          console.log(err);
+        }
+      }
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      try {
+        const res = await api.get("/api/auth/me");
+        if (isMounted) {
+          setCurrentUser(res.data.user || res.data);
+        }
+      } catch (err) {
+        console.error("Failed to load current user", err);
+      }
+    };
+
+    loadCurrentUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // 2. Fetch initial social data
   const fetchRequests = useCallback(async () => {
@@ -75,7 +117,13 @@ export default function Dashboard() {
     if (!value.trim()) return setResults([]);
     try {
       const res = await api.get(`/api/friends/search?username=${value}`);
-      setResults(res.data);
+      setResults(
+        res.data.filter(
+          (user) =>
+            user._id !== currentUser?._id &&
+            user.username !== currentUser?.username
+        )
+      );
     } catch (err) {
       console.log(err);
     }
@@ -103,13 +151,13 @@ export default function Dashboard() {
 
   const handleTabClick = (tab) => {
     setMenuOpen(false);
-  
+
     if (tab === "profile") {
       setActiveTab("profile");
       navigate("/dashboard/profile/me");
       return;
     }
-  
+
     setActiveTab(tab);
     navigate("/dashboard");
   };
@@ -117,7 +165,7 @@ export default function Dashboard() {
     <div className="dashboard-container">
       {/* NAVIGATION BAR */}
       <nav className="dashboard-nav">
-        <div className="nav-logo" onClick={() => navigate("/dashboard")} style={{cursor: 'pointer'}}>
+        <div className="nav-logo" onClick={() => navigate("/dashboard")} style={{ cursor: 'pointer' }}>
           Entwined
         </div>
 
@@ -166,19 +214,19 @@ export default function Dashboard() {
           </div>
         )}
 
-{(
-  activeTab === "profile" ||
-  location.pathname.includes(
-    "/dashboard/profile/"
-  )
-) && (
-  <div className="feed-layout">
-    <ProfileDashboard
-  key={profileId || "own-profile"}
-  userId={profileId}
-/>
-  </div>
-)}
+        {(
+          activeTab === "profile" ||
+          location.pathname.includes(
+            "/dashboard/profile/"
+          )
+        ) && (
+            <div className="feed-layout">
+              <ProfileDashboard
+                key={profileId || "own-profile"}
+                userId={profileId}
+              />
+            </div>
+          )}
 
         {activeTab === "friends" && (
           <div className="dashboard-card">
