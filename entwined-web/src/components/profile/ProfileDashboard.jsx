@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/api";
 import { useAuth } from "../../contexts/AuthContext";
 import PostCard from "../PostCard";
@@ -21,6 +22,7 @@ const tabs = [
 export default function ProfileDashboard({
   userId: propUserId,
 }) {
+  const navigate = useNavigate();
   const { user, verifyAndFetchUser } = useAuth();
 
   const [activeTab, setActiveTab] = useState("posts");
@@ -437,6 +439,7 @@ export default function ProfileDashboard({
             <PostCard
               key={post._id}
               post={post}
+              onOpen={(selected) => navigate(`/dashboard/post/${selected._id}`)}
               onUpdated={() => loadData()}
             />
           ))}

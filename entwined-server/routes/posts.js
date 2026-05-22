@@ -251,5 +251,29 @@ router.get("/comments/:postId", auth, async (req, res) => {
   }
 });
 
+/* ===========================
+   GET SINGLE POST
+=========================== */
+
+router.get("/:postId", auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.postId)
+      .populate("user", "username profileImage")
+      .populate({
+        path: "comments",
+        populate: { path: "user", select: "username profileImage" },
+      });
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    return res.json(post);
+  } catch (err) {
+    console.error("Post fetch error:", err);
+    return res.status(500).json({ error: "Failed to fetch post" });
+  }
+});
+
 
 module.exports = router;

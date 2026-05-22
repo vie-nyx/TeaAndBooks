@@ -1,9 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { useAuth } from "../contexts/AuthContext";
 import PostCard from "./PostCard";
 
 export default function PostFeed() {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -66,6 +68,7 @@ export default function PostFeed() {
           <PostCard
             key={post._id}
             post={post}
+            onOpen={(selected) => navigate(`/dashboard/post/${selected._id}`)}
             onUpdated={(updated) => {
               setPosts((prev) =>
                 prev.map((p) => (p._id === updated._id ? updated : p))

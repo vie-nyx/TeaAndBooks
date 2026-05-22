@@ -136,6 +136,38 @@
   margin-bottom: 8px;
 }
 
+.post-open-target {
+  cursor: pointer;
+}
+
+.post-open-target:hover {
+  opacity: 0.92;
+}
+
+.single-post-view {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.single-post-toolbar {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.single-post-toolbar button {
+  border: none;
+  background: #ffffff;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: #0f172a;
+  cursor: pointer;
+  border: 1px solid #e2e8f0;
+}
+
 .post-actions {
   display: flex;
   align-items: center;

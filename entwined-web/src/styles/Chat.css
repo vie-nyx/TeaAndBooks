@@ -259,6 +259,14 @@
   text-align: left;
 }
 
+.shared-post-open {
+  cursor: pointer;
+}
+
+.shared-post-open:hover {
+  border-color: #cbd5e1;
+}
+
 /* --- File Handling in Messages --- */
 .message-file {
   display: flex;

@@ -1,13 +1,7 @@
-import { useParams } from "react-router-dom";
-import ProfileDashboard from "../components/profile/ProfileDashboard";
-import "../styles/Dashboard.css";
+import { Navigate, useParams } from "react-router-dom";
 
 export default function ProfilePage() {
   const { id } = useParams();
 
-  return (
-    <div className="feed-layout">
-      <ProfileDashboard userId={id} />
-    </div>
-  );
+  return <Navigate to={`/dashboard/profile/${id}`} replace />;
 }

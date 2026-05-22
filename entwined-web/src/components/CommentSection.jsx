@@ -10,7 +10,7 @@ export default function CommentSection({ comments }) {
       {comments.map((comment) => {
         const username = comment.user?.username || "Reader";
         const profilePath = comment.user?._id
-          ? `/profile/${comment.user._id}`
+          ? `/dashboard/profile/${comment.user._id}`
           : null;
         return (
           <div key={comment._id} className="comment-item">

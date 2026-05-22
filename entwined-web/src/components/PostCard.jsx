@@ -5,7 +5,7 @@ import CommentSection from "./CommentSection";
 import CommentInput from "./CommentInput";
 import { useAuth } from "../contexts/AuthContext";
 
-export default function PostCard({ post, onUpdated }) {
+export default function PostCard({ post, onUpdated, onOpen }) {
   const [optimisticPost, setOptimisticPost] = useState(post);
   const [liking, setLiking] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -94,7 +94,8 @@ export default function PostCard({ post, onUpdated }) {
   const { user, imageUrl, caption } = optimisticPost;
   const username = user?.username || "Reader";
   const profileImage = user?.profileImage;
-  const profilePath = user?._id ? `/profile/${user._id}` : null;
+  const profilePath = user?._id ? `/dashboard/profile/${user._id}` : null;
+  const canOpen = typeof onOpen === "function";
 
   return (
     <article className="post-card">
@@ -125,12 +126,40 @@ export default function PostCard({ post, onUpdated }) {
         )}
       </header>
 
-      <div className="post-image-wrapper">
+      <div
+        className={`post-image-wrapper ${canOpen ? "post-open-target" : ""}`}
+        onClick={() => canOpen && onOpen(optimisticPost)}
+        role={canOpen ? "button" : undefined}
+        tabIndex={canOpen ? 0 : undefined}
+        onKeyDown={(event) => {
+          if (!canOpen) return;
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onOpen(optimisticPost);
+          }
+        }}
+      >
         <img src={imageUrl} alt="Post" />
       </div>
 
       <div className="post-body">
-        {caption && <div className="post-caption">{caption}</div>}
+        {caption && (
+          <div
+            className={`post-caption ${canOpen ? "post-open-target" : ""}`}
+            onClick={() => canOpen && onOpen(optimisticPost)}
+            role={canOpen ? "button" : undefined}
+            tabIndex={canOpen ? 0 : undefined}
+            onKeyDown={(event) => {
+              if (!canOpen) return;
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onOpen(optimisticPost);
+              }
+            }}
+          >
+            {caption}
+          </div>
+        )}
 
         <div className="post-actions">
           <button

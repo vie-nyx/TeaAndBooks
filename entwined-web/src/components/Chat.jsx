@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { useSocket } from "../contexts/SocketContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -7,6 +7,7 @@ import "../styles/Chat.css";
 import GroupGoals from "../components/group/GroupGoals";
 import ActiveGoalBanner from "../components/group/ActiveGoalBanner";
 export default function Chat() {
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
   const [friends, setFriends] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -379,7 +380,10 @@ export default function Chat() {
     return user?._id;
   };
 
-  const getProfilePath = (userId) => (userId ? `/profile/${userId}` : null);
+  const getProfilePath = (userId) =>
+    (userId ? `/dashboard/profile/${userId}` : null);
+  const getPostPath = (postId) =>
+    (postId ? `/dashboard/post/${postId}` : null);
 
   const isBookClub = selectedConversation?.groupType === "bookclub";
   console.log("Selected Conversation:", selectedConversation);
@@ -553,13 +557,29 @@ export default function Chat() {
                         <div className="message-text">{message.text}</div>
                       )}
                       {message.postId && (
-                        <div className="shared-post-preview">
+                        <div
+                          className="shared-post-preview shared-post-open"
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => {
+                            const target = getPostPath(message.postId._id);
+                            if (target) navigate(target);
+                          }}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              const target = getPostPath(message.postId._id);
+                              if (target) navigate(target);
+                            }
+                          }}
+                        >
                           <div className="shared-post-header">
                             Shared post by @
                             {getProfilePath(message.postId.user?._id) ? (
                               <Link
                                 to={getProfilePath(message.postId.user?._id)}
                                 className="profile-link"
+                                onClick={(event) => event.stopPropagation()}
                               >
                                 {message.postId.user?.username || "Reader"}
                               </Link>

@@ -6,6 +6,7 @@ import "../styles/Dashboard.css";
 import Chat from "../components/Chat";
 import CreatePost from "../components/CreatePost";
 import PostFeed from "../components/PostFeed";
+import PostDetailView from "../components/PostDetailView";
 import ProfileDashboard from "../components/profile/ProfileDashboard";
 
 export default function Dashboard() {
@@ -15,6 +16,7 @@ export default function Dashboard() {
   location.pathname.split(
     "/dashboard/profile/"
   )[1];
+  const postId = location.pathname.split("/dashboard/post/")[1];
 
   const [activeTab, setActiveTab] = useState(
     location.pathname.includes(
@@ -53,6 +55,9 @@ export default function Dashboard() {
       )
     ) {
       setActiveTab("profile");
+    }
+    if (location.pathname.includes("/dashboard/post/")) {
+      setActiveTab("feed");
     }
   }, [location.pathname]);
   const fetchFriends = useCallback(async () => {
@@ -159,7 +164,13 @@ export default function Dashboard() {
       <main className="dashboard-content">
         {activeTab === "chat" && <Chat />}
 
-        {activeTab === "feed" && (
+        {location.pathname.includes("/dashboard/post/") && (
+          <div className="feed-layout">
+            <PostDetailView postId={postId} />
+          </div>
+        )}
+
+        {activeTab === "feed" && !location.pathname.includes("/dashboard/post/") && (
           <div className="feed-layout">
             <PostFeed />
             <CreatePost />
@@ -194,7 +205,10 @@ export default function Dashboard() {
                 {results.length > 0 ? (
                   results.map((user) => (
                     <div key={user._id} className="user-result">
-                      <Link to={`/profile/${user._id}`} className="profile-link">
+                      <Link
+                        to={`/dashboard/profile/${user._id}`}
+                        className="profile-link"
+                      >
                         {user.username}
                       </Link>
                       <button onClick={() => sendRequest(user.username)}>Add</button>
@@ -211,7 +225,7 @@ export default function Dashboard() {
                   incoming.map((req) => (
                     <div key={req._id} className="user-result">
                       <Link
-                        to={`/profile/${req.sender._id}`}
+                        to={`/dashboard/profile/${req.sender._id}`}
                         className="profile-link"
                       >
                         {req.sender.username}
@@ -232,7 +246,7 @@ export default function Dashboard() {
                   <Link
                     key={friend._id}
                     className="user-result clickable-user profile-link"
-                    to={`/profile/${friend._id}`}
+                    to={`/dashboard/profile/${friend._id}`}
                   >
                     <span>{friend.username}</span>
                   </Link>
