@@ -9,7 +9,7 @@ const getOrCreateConversation = async (req, res) => {
     const { friendId } = req.body;
     const userId = req.userId;
 
-    if (userId === friendId) {
+    if (String(userId) === String(friendId)) {
       return res.status(400).json({ message: "Cannot create conversation with yourself" });
     }
 
@@ -113,7 +113,8 @@ const getMessages = async (req, res) => {
       return res.status(404).json({ message: "Conversation not found" });
     }
 
-    if (!conversation.participants.includes(userId)) {
+    const participantIds = conversation.participants.map(id => id.toString());
+    if (!participantIds.includes(String(userId))) {
       return res.status(403).json({ message: "Not authorized to view this conversation" });
     }
 
@@ -148,7 +149,7 @@ const addGroupMembers = async (req, res) => {
       return res.status(400).json({ message: "Not a group conversation" });
     }
 
-    if (conversation.groupAdmin.toString() !== userId) {
+    if (conversation.groupAdmin.toString() !== String(userId)) {
       return res.status(403).json({ message: "Only group admin can add members" });
     }
 
