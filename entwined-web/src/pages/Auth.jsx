@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+
 import { useAuth } from "../contexts/AuthContext";
 import "../styles/Auth.css";
 
@@ -12,14 +14,25 @@ export default function Auth() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showResend, setShowResend] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const navigate = useNavigate();
   const API = `${import.meta.env.VITE_API_URL}/api/auth`;
+
+  /* ================= VALIDATIONS ================= */
+
+  const validateEmail = (value) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  };
 
   /* ================= SIGNUP ================= */
 
@@ -27,8 +40,23 @@ export default function Auth() {
     setError("");
     setShowResend(false);
 
-    if (!username.trim() || !email.trim() || !password.trim()) {
+    if (
+      !username.trim() ||
+      !email.trim() ||
+      !password.trim() ||
+      !confirmPassword.trim()
+    ) {
       setError("Please fill in all fields");
+      return;
+    }
+
+    if (username.trim().length < 3) {
+      setError("Username must be at least 3 characters");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email");
       return;
     }
 
@@ -37,26 +65,34 @@ export default function Auth() {
       return;
     }
 
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
 
     try {
       await axios.post(
         `${API}/signup`,
-        { username, email, password },
-        { withCredentials: true }
+        {
+          username: username.trim(),
+          email: email.trim(),
+          password,
+        },
+        { withCredentials: true },
       );
 
       alert("Signup successful! Please verify your email.");
-      setIsSignup(false);
-      setUsername("");
-      setPassword("");
 
+      setIsSignup(false);
+
+      setUsername("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-        err.message ||
-        "Signup failed."
-      );
+      setError(err.response?.data?.message || err.message || "Signup failed.");
     } finally {
       setLoading(false);
     }
@@ -73,55 +109,40 @@ export default function Auth() {
       return;
     }
 
+    if (!validateEmail(email)) {
+      setError("Please enter a valid email");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      console.log("🔐 [LOGIN] Sending login request...");
       const res = await axios.post(
         `${API}/login`,
-        { email, password },
-        { withCredentials: true }
+        {
+          email: email.trim(),
+          password,
+        },
+        { withCredentials: true },
       );
 
-      console.log("✅ [LOGIN] Login response received:", {
-        hasUser: !!res.data.user,
-        hasAccessToken: !!res.data.accessToken,
-        accessTokenLength: res.data.accessToken?.length || 0,
-        accessTokenPreview: res.data.accessToken?.substring(0, 20) + "..."
-      });
-
       if (!res.data.accessToken) {
-        console.error("❌ [LOGIN] No accessToken in response!");
         setError("Login failed: No token received");
         return;
       }
 
-      console.log("💾 [LOGIN] Storing token in localStorage...");
       await login(res.data.user, res.data.accessToken);
-      
-      // Verify token was stored
-      const storedToken = localStorage.getItem("token");
-      console.log("✅ [LOGIN] Token stored:", {
-        exists: !!storedToken,
-        length: storedToken?.length || 0,
-        matches: storedToken === res.data.accessToken
-      });
 
       navigate("/dashboard");
-
     } catch (err) {
-      console.error("❌ [LOGIN] Login error:", err);
       const message =
-        err.response?.data?.message ||
-        err.message ||
-        "Login failed.";
+        err.response?.data?.message || err.message || "Login failed.";
 
       setError(message);
 
       if (message.toLowerCase().includes("verify")) {
         setShowResend(true);
       }
-
     } finally {
       setLoading(false);
     }
@@ -141,15 +162,13 @@ export default function Auth() {
       await axios.post(
         `${API}/resend-verification`,
         { email },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       alert("Verification email sent.");
-
     } catch (err) {
       setError(
-        err.response?.data?.message ||
-        "Failed to resend verification email."
+        err.response?.data?.message || "Failed to resend verification email.",
       );
     } finally {
       setResendLoading(false);
@@ -163,45 +182,25 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      console.log("🔐 [GOOGLE LOGIN] Sending Google login request...");
       const res = await axios.post(
         `${API}/google`,
         { token: credentialResponse.credential },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       const backendToken = res.data.accessToken || res.data.token;
 
-      console.log("✅ [GOOGLE LOGIN] Login response received:", {
-        hasUser: !!res.data.user,
-        hasAccessToken: !!res.data.accessToken,
-        hasFallbackToken: !!res.data.token,
-        tokenLength: backendToken?.length || 0,
-      });
-
       if (!backendToken) {
-        console.error("❌ [GOOGLE LOGIN] No token in response!", res.data);
         setError("Google login failed: No token received from server");
         return;
       }
 
-      console.log("💾 [GOOGLE LOGIN] Storing token in localStorage...");
       await login(res.data.user, backendToken);
-      
-      const storedToken = localStorage.getItem("token");
-      console.log("✅ [GOOGLE LOGIN] Token stored:", {
-        exists: !!storedToken,
-        length: storedToken?.length || 0
-      });
 
       navigate("/dashboard");
-
     } catch (err) {
-      console.error("❌ [GOOGLE LOGIN] Login error:", err);
       setError(
-        err.response?.data?.message ||
-        err.message ||
-        "Google login failed."
+        err.response?.data?.message || err.message || "Google login failed.",
       );
     } finally {
       setLoading(false);
@@ -213,36 +212,97 @@ export default function Auth() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-
         <div className="auth-title">
           {isSignup ? "Create Account" : "Welcome Back"}
         </div>
 
         {error && <div className="auth-error">{error}</div>}
 
+        {/* USERNAME */}
+
         {isSignup && (
-          <input
-            className="auth-input"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
+          <div className="input-wrapper">
+            <User size={18} className="input-icon" />
+
+            <input
+              className="auth-input"
+              type="text"
+              placeholder="Username"
+              value={username}
+              maxLength={20}
+              onChange={(e) =>
+                setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ""))
+              }
+            />
+          </div>
         )}
 
-        <input
-          className="auth-input"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        {/* EMAIL */}
 
-        <input
-          className="auth-input"
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="input-wrapper">
+          <Mail size={18} className="input-icon" />
+
+          <input
+            className="auth-input"
+            type="email"
+            placeholder="Email"
+            value={email}
+            autoComplete="email"
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+
+        {/* PASSWORD */}
+
+        <div className="input-wrapper">
+          <Lock size={18} className="input-icon" />
+
+          <input
+            className="auth-input"
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            minLength={6}
+            autoComplete={isSignup ? "new-password" : "current-password"}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
+
+        {/* CONFIRM PASSWORD */}
+
+        {isSignup && (
+          <div className="input-wrapper">
+            <Lock size={18} className="input-icon" />
+
+            <input
+              className="auth-input"
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              minLength={6}
+              autoComplete="new-password"
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+        )}
+
+        {/* FORGOT PASSWORD */}
 
         {!isSignup && (
           <div
@@ -252,6 +312,8 @@ export default function Auth() {
             Forgot Password?
           </div>
         )}
+
+        {/* AUTH BUTTONS */}
 
         {isSignup ? (
           <button
@@ -277,15 +339,17 @@ export default function Auth() {
                 onClick={handleResend}
                 disabled={resendLoading}
               >
-                {resendLoading
-                  ? "Sending..."
-                  : "Resend Verification Email"}
+                {resendLoading ? "Sending..." : "Resend Verification Email"}
               </button>
             )}
           </>
         )}
 
+        {/* DIVIDER */}
+
         <div className="auth-divider">or continue with</div>
+
+        {/* GOOGLE LOGIN */}
 
         <div className="google-btn-wrapper">
           <GoogleLogin
@@ -294,19 +358,24 @@ export default function Auth() {
           />
         </div>
 
+        {/* SWITCH */}
+
         <div
           className="auth-switch"
           onClick={() => {
             setIsSignup(!isSignup);
+
             setError("");
             setShowResend(false);
+
+            setPassword("");
+            setConfirmPassword("");
           }}
         >
           {isSignup
             ? "Already have an account? Login"
             : "Don't have an account? Sign Up"}
         </div>
-
       </div>
     </div>
   );
