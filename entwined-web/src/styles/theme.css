@@ -1,0 +1,186 @@
+/* GLOBAL BASE STYLES*/
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Apply theme background + text */
+body.light {
+  background-color: #ffffff;
+  color: #111111;
+}
+
+body.dark {
+  background-color: #121212;
+  color: #f1f1f1;
+}
+
+/* CARDS / CONTAINERS */
+
+.card,
+.dashboard-card,
+.auth-card,
+.feed-layout {
+  transition: background 0.3s ease, color 0.3s ease;
+  border-radius: 10px;
+}
+
+/* Light mode cards */
+body.light .card,
+body.light .dashboard-card,
+body.light .auth-card,
+body.light .feed-layout {
+  background: #ffffff;
+  color: #111;
+}
+
+/* Dark mode cards */
+body.dark .card,
+body.dark .dashboard-card,
+body.dark .auth-card,
+body.dark .feed-layout {
+  background: #1e1e1e;
+  color: #ffffff;
+}
+
+/* NAVBAR*/
+
+.dashboard-nav {
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+body.light .dashboard-nav {
+  background: #f5f5f5;
+  color: #111;
+}
+
+body.dark .dashboard-nav {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+/* INPUTS */
+
+input,
+textarea {
+  transition: all 0.3s ease;
+  border-radius: 6px;
+  padding: 10px;
+  outline: none;
+}
+
+/* Light input */
+body.light input,
+body.light textarea {
+  background: #ffffff;
+  color: #111;
+  border: 1px solid #ccc;
+}
+
+/* Dark input */
+body.dark input,
+body.dark textarea {
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #444;
+}
+
+/* BUTTONS*/
+
+button {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Theme toggle button */
+.theme-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+/* Light theme button */
+body.light .theme-btn {
+  background: #222;
+  color: #fff;
+}
+
+/* Dark theme button */
+body.dark .theme-btn {
+  background: #ffffff;
+  color: #111;
+}
+
+/* Generic buttons */
+body.light button {
+  background: #222;
+  color: white;
+  border: none;
+}
+
+body.dark button {
+  background: #333;
+  color: white;
+  border: none;
+}
+
+/* CHAT UI */
+
+.chat-box,
+.message-box {
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+body.light .chat-box,
+body.light .message-box {
+  background: #f9f9f9;
+  color: #111;
+}
+
+body.dark .chat-box,
+body.dark .message-box {
+  background: #1f1f1f;
+  color: #fff;
+}
+
+/* FRIENDS / LIST ITEMS*/
+
+.user-result {
+  transition: background 0.3s ease;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+body.dark .user-result {
+  background: #222;
+}
+
+body.light .user-result {
+  background: #f4f4f4;
+}
+
+/* TEXT STATES */
+
+.empty-state {
+  opacity: 0.7;
+}
+
+/*LINKS */
+
+a {
+  transition: color 0.3s ease;
+}
+
+body.dark a {
+  color: #4ea1ff;
+}
+
+body.light a {
+  color: #0077ff;
+}

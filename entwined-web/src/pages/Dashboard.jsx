@@ -7,6 +7,7 @@ import Chat from "../components/Chat";
 import CreatePost from "../components/CreatePost";
 import PostFeed from "../components/PostFeed";
 import ProfileDashboard from "../components/profile/ProfileDashboard";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -166,6 +167,7 @@ export default function Dashboard() {
       {/* NAVIGATION BAR */}
       <nav className="dashboard-nav">
         <div className="nav-logo" onClick={() => navigate("/dashboard")} style={{ cursor: 'pointer' }}>
+          <ThemeToggle />
           Entwined
         </div>
 
