@@ -1,57 +1,82 @@
-
 .auth-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0f4f8; /* cool light blue-tinted */
+  background: #f0f4f8;
   padding: 24px;
-  font-family: \"Inter\", system-ui, -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
-.google-btn-wrapper {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
-/* Card */
+
+/* CARD */
+
 .auth-card {
   width: 100%;
   max-width: 420px;
   background: #ffffff;
   padding: 48px 40px;
-  border-radius: 16px;
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.1);
+
   display: flex;
   flex-direction: column;
   gap: 18px;
-  border: 1px solid #e2e8f0;
 }
 
-/* Title */
+/* TITLE */
+
 .auth-title {
-  font-size: 26px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 700;
   color: #0f172a;
   text-align: center;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
-/* Subtitle */
+/* SUBTITLE */
+
 .auth-subtitle {
   font-size: 14px;
   text-align: center;
   color: #64748b;
-  margin-bottom: 10px;
+  margin-top: -8px;
+  margin-bottom: 8px;
 }
 
-/* Inputs */
+/* INPUT WRAPPER */
+
+.input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* ICONS */
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  pointer-events: none;
+}
+
+/* INPUTS */
+
 .auth-input {
-  padding: 12px 14px;
+  width: 100%;
+  padding: 13px 44px 13px 42px;
   font-size: 14px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid #cbd5e1;
   background: #ffffff;
   color: #0f172a;
+
   transition: all 0.2s ease;
 }
 
@@ -62,23 +87,56 @@
 .auth-input:focus {
   outline: none;
   border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-/* Primary button */
-.auth-button {
-  padding: 12px;
-  font-size: 14px;
-  border-radius: 10px;
+/* PASSWORD TOGGLE */
+
+.password-toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+
   border: none;
+  background: transparent;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   cursor: pointer;
+  color: #64748b;
+
+  transition: 0.2s ease;
+}
+
+.password-toggle:hover {
+  color: #0f172a;
+}
+
+/* PRIMARY BUTTON */
+
+.auth-button {
+  width: 100%;
+  padding: 13px;
+  font-size: 14px;
+  font-weight: 600;
+
+  border: none;
+  border-radius: 12px;
+
+  cursor: pointer;
+
   background: linear-gradient(135deg, #2563eb, #9333ea);
+
   color: white;
-  font-weight: 500;
+
   transition: all 0.2s ease;
 }
 
 .auth-button:hover:not(:disabled) {
+  transform: translateY(-1px);
   filter: brightness(1.05);
 }
 
@@ -87,7 +145,8 @@
   cursor: not-allowed;
 }
 
-/* Secondary button */
+/* SECONDARY BUTTON */
+
 .auth-secondary {
   background: transparent;
   border: 1px solid #cbd5e1;
@@ -98,34 +157,19 @@
   background: #f1f5f9;
 }
 
-/* Divider */
-.auth-divider {
-  text-align: center;
-  font-size: 13px;
-  color: #94a3b8;
-  margin: 10px 0;
-}
+/* ERROR */
 
-/* Responsive */
-@media (max-width: 480px) {
-  .auth-card {
-    padding: 32px 24px;
-  }
-
-  .auth-title {
-    font-size: 22px;
-  }
-}
 .auth-error {
   padding: 12px;
-  margin-bottom: 15px;
   background: #fee2e2;
   color: #b91c1c;
   border: 1px solid #fecaca;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 14px;
   text-align: center;
 }
+
+/* RESEND BUTTON */
 
 .resend-button {
   background: transparent;
@@ -133,21 +177,107 @@
   color: #2563eb;
   cursor: pointer;
   text-decoration: underline;
-  margin-top: 10px;
+  font-size: 14px;
+
+  margin-top: -6px;
+
+  transition: 0.2s ease;
 }
+
+.resend-button:hover {
+  color: #1d4ed8;
+}
+
+/* FORGOT PASSWORD */
 
 .forgot-password-link {
   text-align: right;
   font-size: 13px;
   cursor: pointer;
-  margin-bottom: 10px;
   color: #64748b;
+
+  margin-top: -6px;
+
+  transition: 0.2s ease;
 }
+
+.forgot-password-link:hover {
+  color: #2563eb;
+}
+
+/* DIVIDER */
+
+.auth-divider {
+  text-align: center;
+  font-size: 13px;
+  color: #94a3b8;
+  position: relative;
+  margin: 6px 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 35%;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.auth-divider::before {
+  left: 0;
+}
+
+.auth-divider::after {
+  right: 0;
+}
+
+/* GOOGLE BUTTON */
+
+.google-btn-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* SWITCH */
 
 .auth-switch {
   text-align: center;
-  margin-top: 10px;
+  margin-top: 6px;
   font-size: 13px;
   color: #64748b;
   cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.auth-switch:hover {
+  color: #2563eb;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 16px;
+  }
+
+  .auth-card {
+    padding: 32px 22px;
+    border-radius: 16px;
+  }
+
+  .auth-title {
+    font-size: 24px;
+  }
+
+  .auth-input {
+    font-size: 13px;
+  }
+
+  .auth-button {
+    font-size: 13px;
+  }
 }
