@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import api from "../api/api";
 import { useSocket } from "../contexts/SocketContext";
 import { useAuth } from "../contexts/AuthContext";
+import { validateGroupName, validateSelection } from "../utils/validation";
 import "../styles/Chat.css";
 import GroupGoals from "../components/group/GroupGoals";
 import ActiveGoalBanner from "../components/group/ActiveGoalBanner";
@@ -18,6 +19,9 @@ export default function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [previewFile, setPreviewFile] = useState(null);
+  const [groupModalErrors, setGroupModalErrors] = useState({});
+  const [groupModalError, setGroupModalError] = useState("");
+  const [groupCreating, setGroupCreating] = useState(false);
   const typingTimeoutRef = useRef(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -324,10 +328,26 @@ export default function Chat() {
   const handleCreateGroup = async () => {
     console.log("Create button clicked");
 
-    if (!groupName.trim() || selectedFriends.length === 0) {
-      console.log("Validation failed", { groupName, selectedFriends });
+    // Validate form
+    const errors = {};
+    
+    const groupNameValidation = validateGroupName(groupName);
+    if (!groupNameValidation.isValid) {
+      errors.groupName = groupNameValidation.message;
+    }
+    
+    const friendsValidation = validateSelection(selectedFriends, "friend");
+    if (!friendsValidation.isValid) {
+      errors.friends = friendsValidation.message;
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setGroupModalErrors(errors);
       return;
     }
+
+    setGroupCreating(true);
+    setGroupModalError("");
 
     try {
       console.log("Sending request...", {
@@ -350,9 +370,17 @@ export default function Chat() {
       setGroupName("");
       setSelectedFriends([]);
       setGroupType("discussion");
+      setGroupModalErrors({});
     } catch (err) {
       console.error("Error creating group:", err);
       console.error("Error response:", err.response?.data);
+      setGroupModalError(
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to create group. Please try again."
+      );
+    } finally {
+      setGroupCreating(false);
     }
   };
   const toggleFriendSelection = (friend) => {
@@ -671,6 +699,12 @@ export default function Chat() {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>Create Group Chat</h2>
 
+            {groupModalError && (
+              <div className="modal-error">
+                <span className="error-icon">⚠️</span> {groupModalError}
+              </div>
+            )}
+
             <div style={{ marginBottom: "10px" }}>
               <label>
                 <input
@@ -692,28 +726,80 @@ export default function Chat() {
                 Book Club
               </label>
             </div>
-            <input
-              type="text"
-              placeholder="Group name"
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              className="modal-input"
-            />
-            <div className="friends-selection">
-              {friends.map((friend) => (
-                <label key={friend._id} className="friend-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={selectedFriends.some((f) => f._id === friend._id)}
-                    onChange={() => toggleFriendSelection(friend)}
-                  />
-                  {friend.username}
-                </label>
-              ))}
+
+            <div className="modal-form-field">
+              <input
+                type="text"
+                placeholder="Group name"
+                value={groupName}
+                onChange={(e) => {
+                  setGroupName(e.target.value);
+                  // Clear error when user starts typing
+                  if (groupModalErrors.groupName) {
+                    setGroupModalErrors(prev => {
+                      const updated = { ...prev };
+                      delete updated.groupName;
+                      return updated;
+                    });
+                  }
+                }}
+                className={`modal-input ${groupModalErrors.groupName ? 'input-error' : ''}`}
+              />
+              {groupModalErrors.groupName && (
+                <div className="field-error-message">
+                  <span className="error-icon">⚠️</span> {groupModalErrors.groupName}
+                </div>
+              )}
             </div>
+
+            <div className={`friends-selection ${groupModalErrors.friends ? 'selection-error' : ''}`}>
+              {friends.length > 0 ? (
+                friends.map((friend) => (
+                  <label key={friend._id} className="friend-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={selectedFriends.some((f) => f._id === friend._id)}
+                      onChange={() => {
+                        toggleFriendSelection(friend);
+                        // Clear error when user selects a friend
+                        if (groupModalErrors.friends) {
+                          setGroupModalErrors(prev => {
+                            const updated = { ...prev };
+                            delete updated.friends;
+                            return updated;
+                          });
+                        }
+                      }}
+                    />
+                    {friend.username}
+                  </label>
+                ))
+              ) : (
+                <div className="no-friends-message">No friends available. Add some friends first!</div>
+              )}
+            </div>
+            {groupModalErrors.friends && (
+              <div className="field-error-message">
+                <span className="error-icon">⚠️</span> {groupModalErrors.friends}
+              </div>
+            )}
+
             <div className="modal-actions">
-              <button onClick={() => setShowGroupModal(false)}>Cancel</button>
-              <button onClick={handleCreateGroup}>Create</button>
+              <button 
+                onClick={() => {
+                  setShowGroupModal(false);
+                  setGroupModalErrors({});
+                  setGroupModalError("");
+                }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleCreateGroup}
+                disabled={groupCreating}
+              >
+                {groupCreating ? "Creating..." : "Create"}
+              </button>
             </div>
           </div>
         </div>

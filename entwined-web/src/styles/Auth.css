@@ -151,3 +151,74 @@
   color: #64748b;
   cursor: pointer;
 }
+
+/* Form Field Container */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+/* Error Input State */
+.input-error {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+  border-color: #ef4444 !important;
+}
+
+/* Field Error Message */
+.field-error-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #dc2626;
+  margin-top: 2px;
+  animation: slideIn 0.2s ease-out;
+}
+
+.error-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* Field Success Message */
+.field-success-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #16a34a;
+  margin-top: 2px;
+  animation: slideIn 0.2s ease-out;
+}
+
+.success-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* Animation for error/success messages */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile responsive for error messages */
+@media (max-width: 480px) {
+  .field-error-message,
+  .field-success-message {
+    font-size: 12px;
+  }
+}

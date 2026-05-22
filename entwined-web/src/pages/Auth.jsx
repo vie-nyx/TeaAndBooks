@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../contexts/AuthContext";
+import { validateEmail, validatePassword, validateUsername } from "../utils/validation";
 import "../styles/Auth.css";
 
 export default function Auth() {
@@ -14,6 +15,7 @@ export default function Auth() {
   const [password, setPassword] = useState("");
 
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showResend, setShowResend] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
@@ -21,19 +23,64 @@ export default function Auth() {
   const navigate = useNavigate();
   const API = `${import.meta.env.VITE_API_URL}/api/auth`;
 
+  /* ================= FIELD VALIDATION ================= */
+
+  const validateSignupForm = () => {
+    const errors = {};
+    
+    const usernameValidation = validateUsername(username);
+    if (!usernameValidation.isValid) {
+      errors.username = usernameValidation.message;
+    }
+    
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      errors.email = emailValidation.message;
+    }
+    
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      errors.password = passwordValidation.message;
+    }
+    
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateLoginForm = () => {
+    const errors = {};
+    
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      errors.email = emailValidation.message;
+    }
+    
+    if (!password.trim()) {
+      errors.password = "Password is required";
+    }
+    
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleFieldChange = (field, value) => {
+    // Clear the error for this field when user starts typing
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => {
+        const updated = { ...prev };
+        delete updated[field];
+        return updated;
+      });
+    }
+  };
+
   /* ================= SIGNUP ================= */
 
   const handleSignup = async () => {
     setError("");
     setShowResend(false);
 
-    if (!username.trim() || !email.trim() || !password.trim()) {
-      setError("Please fill in all fields");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (!validateSignupForm()) {
       return;
     }
 
@@ -68,8 +115,7 @@ export default function Auth() {
     setError("");
     setShowResend(false);
 
-    if (!email.trim() || !password.trim()) {
-      setError("Please enter both email and password");
+    if (!validateLoginForm()) {
       return;
     }
 
@@ -221,28 +267,63 @@ export default function Auth() {
         {error && <div className="auth-error">{error}</div>}
 
         {isSignup && (
-          <input
-            className="auth-input"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
+          <div className="form-field">
+            <input
+              className={`auth-input ${fieldErrors.username ? 'input-error' : ''}`}
+              placeholder="Username"
+              value={username}
+              onChange={(e) => {
+                setUsername(e.target.value);
+                handleFieldChange('username', e.target.value);
+              }}
+            />
+            {fieldErrors.username && (
+              <div className="field-error-message">
+                <span className="error-icon">⚠️</span> {fieldErrors.username}
+              </div>
+            )}
+          </div>
         )}
 
-        <input
-          className="auth-input"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <div className="form-field">
+          <input
+            className={`auth-input ${fieldErrors.email ? 'input-error' : ''}`}
+            placeholder="Email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              handleFieldChange('email', e.target.value);
+            }}
+          />
+          {fieldErrors.email && (
+            <div className="field-error-message">
+              <span className="error-icon">⚠️</span> {fieldErrors.email}
+            </div>
+          )}
+        </div>
 
-        <input
-          className="auth-input"
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="form-field">
+          <input
+            className={`auth-input ${fieldErrors.password ? 'input-error' : ''}`}
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              handleFieldChange('password', e.target.value);
+            }}
+          />
+          {fieldErrors.password && (
+            <div className="field-error-message">
+              <span className="error-icon">⚠️</span> {fieldErrors.password}
+            </div>
+          )}
+          {isSignup && !fieldErrors.password && password && (
+            <div className="field-success-message">
+              <span className="success-icon">✓</span> Password meets requirements
+            </div>
+          )}
+        </div>
 
         {!isSignup && (
           <div
@@ -299,6 +380,7 @@ export default function Auth() {
           onClick={() => {
             setIsSignup(!isSignup);
             setError("");
+            setFieldErrors({});
             setShowResend(false);
           }}
         >

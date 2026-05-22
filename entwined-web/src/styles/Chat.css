@@ -630,3 +630,100 @@
   box-sizing: border-box;
   margin: 20px;
 }
+
+/* --- Modal Error Handling --- */
+
+.modal-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 14px;
+  animation: slideIn 0.2s ease-out;
+}
+
+.modal-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 15px 0;
+}
+
+.modal-input.input-error {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+.modal-input.input-error:focus {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+  border-color: #ef4444 !important;
+}
+
+.field-error-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #dc2626;
+  margin-top: 2px;
+  animation: slideIn 0.2s ease-out;
+}
+
+.error-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* Error state for friend selection */
+.friends-selection.selection-error {
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background-color: #fef2f2;
+  padding: 8px;
+}
+
+.friends-selection {
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 15px 0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.no-friends-message {
+  padding: 20px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* Animation for error messages */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile responsive for modal errors */
+@media (max-width: 480px) {
+  .modal-content {
+    width: 95%;
+    max-width: 400px;
+  }
+  
+  .field-error-message,
+  .modal-error {
+    font-size: 12px;
+  }
+}
