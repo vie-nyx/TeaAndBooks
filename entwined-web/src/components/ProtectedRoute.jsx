@@ -1,8 +1,9 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   // Show loading while AuthContext is verifying token
   if (loading) {
@@ -22,7 +23,8 @@ export default function ProtectedRoute({ children }) {
 
   // If no user after loading, redirect to login
   if (!user) {
-    return <Navigate to="/" replace />;
+    const returnTo = `${location.pathname}${location.search}${location.hash}`;
+    return <Navigate to={`/?redirect=${encodeURIComponent(returnTo)}`} replace />;
   }
 
   return children;

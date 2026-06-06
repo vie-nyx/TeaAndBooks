@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../contexts/AuthContext";
 import "../styles/Auth.css";
@@ -19,7 +19,13 @@ export default function Auth() {
   const [resendLoading, setResendLoading] = useState(false);
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const API = `${import.meta.env.VITE_API_URL}/api/auth`;
+  const redirectPath = searchParams.get("redirect");
+  const safeRedirectPath =
+    redirectPath && redirectPath.startsWith("/") && !redirectPath.startsWith("//")
+      ? redirectPath
+      : "/dashboard";
 
   /* ================= SIGNUP ================= */
 
@@ -107,7 +113,7 @@ export default function Auth() {
         matches: storedToken === res.data.accessToken
       });
 
-      navigate("/dashboard");
+      navigate(safeRedirectPath);
 
     } catch (err) {
       console.error("❌ [LOGIN] Login error:", err);
@@ -194,7 +200,7 @@ export default function Auth() {
         length: storedToken?.length || 0
       });
 
-      navigate("/dashboard");
+      navigate(safeRedirectPath);
 
     } catch (err) {
       console.error("❌ [GOOGLE LOGIN] Login error:", err);

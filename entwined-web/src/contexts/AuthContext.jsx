@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 
 const AuthContext = createContext(null);
@@ -17,12 +16,23 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const handleForcedLogout = () => {
+      setUser(null);
+      setLoading(false);
+    };
+
+    window.addEventListener("auth:logout", handleForcedLogout);
+
     const token = localStorage.getItem("token");
     if (token) {
       verifyAndFetchUser();
     } else {
       setLoading(false);
     }
+
+    return () => {
+      window.removeEventListener("auth:logout", handleForcedLogout);
+    };
   }, []);
 
   // Verify token with backend and fetch user data
@@ -52,7 +62,7 @@ export const AuthProvider = ({ children }) => {
             const payload = JSON.parse(atob(token.split(".")[1]));
             setUser({ _id: payload.id });
           }
-        } catch (e) {
+        } catch {
           // Token is malformed, remove it
           localStorage.removeItem("token");
           setUser(null);
@@ -105,6 +115,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     setUser(null);
   };
 
