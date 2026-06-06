@@ -4,6 +4,31 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
+const PUBLIC_PATHS = ["/", "/forgot-password", "/verify-email", "/reset-password"];
+
+const isPublicPath = (path) =>
+  PUBLIC_PATHS.some((publicPath) =>
+    publicPath === "/" ? path === "/" : path.startsWith(publicPath)
+  );
+
+const clearAuthAndRedirect = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  window.dispatchEvent(new Event("auth:logout"));
+
+  const { pathname, search, hash } = window.location;
+  if (isPublicPath(pathname)) {
+    return;
+  }
+
+  const returnTo = `${pathname}${search}${hash}`;
+  const loginUrl = `/?redirect=${encodeURIComponent(returnTo)}`;
+
+  if (`${pathname}${search}${hash}` !== loginUrl) {
+    window.location.replace(loginUrl);
+  }
+};
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   
@@ -52,13 +77,14 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // If 401 and not already retrying
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       if (isRefreshing) {
         // If already refreshing, queue this request
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then(token => {
+            originalRequest.headers = originalRequest.headers || {};
             originalRequest.headers.Authorization = `Bearer ${token}`;
             return api(originalRequest);
           })
@@ -88,12 +114,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         // Refresh failed - clear token and redirect
         processQueue(refreshError, null);
-        localStorage.removeItem("token");
-        
-        const currentPath = window.location.pathname;
-        if (currentPath !== "/" && !currentPath.startsWith("/dashboard")) {
-          window.location.href = "/";
-        }
+        clearAuthAndRedirect();
         
         return Promise.reject(refreshError);
       } finally {
