@@ -74,15 +74,14 @@ For reference while testing friend-related features, search for users like:
 * Firebase Admin SDK
 * JWT Authentication
 * Multer
-* Cloudinary
+* Cloudinarycd TeaAndBooks-MOHITAGARWAL
 
 ---
 
 
 ## Folder Structure
 
-```bash
-```txt
+```text
 TeaAndBooks/
 │
 ├── entwined-web/
