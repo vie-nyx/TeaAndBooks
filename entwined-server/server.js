@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const mongoose = require("mongoose");
@@ -102,19 +103,9 @@ SECURITY MIDDLEWARE
 
 app.use(helmet());
 
-/*
-========================
-COMPRESSION
-========================
-*/
+
 
 app.use(compression());
-
-/*
-========================
-RATE LIMITING
-========================
-*/
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -125,12 +116,6 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
-
-/*
-========================
-CORS
-========================
-*/
 
 app.use(
   cors({

@@ -1,1 +1,3 @@
 entwined-server/firebaseKey.json
+entwined-server/.env
+entwined-web/.env

@@ -1,13 +1,11 @@
 const admin = require("firebase-admin");
+const serviceAccount = require("../firebaseKey.json"); // uses the file directly, no env variable needed
 
-const serviceAccount = JSON.parse(
-  process.env.FIREBASE_KEY
-);
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  storageBucket: "YOUR_BUCKET.appspot.com"
-});
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  });
+}
 
-const bucket = admin.storage().bucket();
-
-module.exports = bucket;
+module.exports = admin;

@@ -7,8 +7,6 @@ const { OAuth2Client } = require("google-auth-library");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-/* ================= TOKEN HELPERS ================= */
-
 const createAccessToken = (user) => {
   return jwt.sign(
     { id: user._id, tokenVersion: user.tokenVersion },
@@ -48,19 +46,39 @@ const signup = async (req, res) => {
       email,
       password: hashedPassword,
       emailVerificationToken: hashedToken,
-      emailVerificationExpire: Date.now() + 24 * 60 * 60 * 1000
+      emailVerificationExpire: Date.now() + 24 * 60 * 60 * 1000,
     });
 
     const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${rawToken}`;
 
     await sendEmail({
       email: user.email,
-      subject: "Verify your email",
-      html: `<a href="${verificationUrl}">${verificationUrl}</a>`
+      subject: "Verify your Entwined account 📚",
+      html: `
+        <div style="font-family: sans-serif; max-width: 500px; margin: auto;">
+          <h2>Welcome to Entwined!</h2>
+          <p>Thanks for signing up. Please verify your email to get started.</p>
+          <p>This link expires in <strong>24 hours</strong>.</p>
+          <a href="${verificationUrl}" style="
+            display: inline-block;
+            background: #6c63ff;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 16px 0;
+          ">Verify Email</a>
+          <p style="color: #888; font-size: 13px;">
+            If you did not create an account, you can safely ignore this email.
+          </p>
+        </div>
+      `,
     });
 
-    res.json({ message: "Signup successful. Please verify your email." });
-
+    res.status(201).json({
+      message: "Signup successful. Please check your email to verify your account.",
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -77,7 +95,7 @@ const verifyEmail = async (req, res) => {
 
     const user = await User.findOne({
       emailVerificationToken: hashedToken,
-      emailVerificationExpire: { $gt: Date.now() }
+      emailVerificationExpire: { $gt: Date.now() },
     });
 
     if (!user)
@@ -89,9 +107,69 @@ const verifyEmail = async (req, res) => {
     await user.save();
 
     res.json({ message: "Email verified successfully" });
-
   } catch {
     res.status(500).json({ message: "Verification failed" });
+  }
+};
+
+/* ================= RESEND VERIFICATION EMAIL ================= */
+
+const resendVerification = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    // Always respond the same way to avoid email enumeration attacks
+    if (!user || user.isVerified) {
+      return res.json({
+        message:
+          "If this email exists and is unverified, a new verification link has been sent.",
+      });
+    }
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(rawToken)
+      .digest("hex");
+
+    user.emailVerificationToken = hashedToken;
+    user.emailVerificationExpire = Date.now() + 24 * 60 * 60 * 1000;
+    await user.save();
+
+    const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${rawToken}`;
+
+    await sendEmail({
+      email: user.email,
+      subject: "Resend: Verify your Entwined account 📚",
+      html: `
+        <div style="font-family: sans-serif; max-width: 500px; margin: auto;">
+          <h2>Verify your email</h2>
+          <p>Here is your new verification link. It expires in <strong>24 hours</strong>.</p>
+          <a href="${verificationUrl}" style="
+            display: inline-block;
+            background: #6c63ff;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 16px 0;
+          ">Verify Email</a>
+          <p style="color: #888; font-size: 13px;">
+            If you did not request this, you can safely ignore it.
+          </p>
+        </div>
+      `,
+    });
+
+    res.json({
+      message:
+        "If this email exists and is unverified, a new verification link has been sent.",
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -106,11 +184,14 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "User not found" });
 
     if (!user.isVerified)
-      return res.status(400).json({ message: "Please verify your email first" });
+      return res.status(403).json({
+        message: "Please verify your email before logging in.",
+        notVerified: true,
+      });
 
     if (user.lockUntil && user.lockUntil > Date.now()) {
       return res.status(403).json({
-        message: "Account locked. Try again later."
+        message: "Account locked. Try again later.",
       });
     }
 
@@ -136,9 +217,9 @@ const login = async (req, res) => {
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: false, // true in production
+      secure: false, // set to true in production
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({
@@ -146,10 +227,9 @@ const login = async (req, res) => {
       user: {
         _id: user._id,
         username: user.username,
-        email: user.email
-      }
+        email: user.email,
+      },
     });
-
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -170,7 +250,6 @@ const refreshTokenHandler = async (req, res) => {
 
     const newAccessToken = createAccessToken(user);
     res.json({ accessToken: newAccessToken });
-
   } catch {
     res.sendStatus(403);
   }
@@ -204,7 +283,7 @@ const forgotPassword = async (req, res) => {
     const user = await User.findOne({ email });
     if (!user)
       return res.status(200).json({
-        message: "If this email exists, a reset link has been sent."
+        message: "If this email exists, a reset link has been sent.",
       });
 
     const rawToken = crypto.randomBytes(32).toString("hex");
@@ -221,12 +300,29 @@ const forgotPassword = async (req, res) => {
 
     await sendEmail({
       email: user.email,
-      subject: "Password Reset",
-      html: `<a href="${resetUrl}">${resetUrl}</a>`
+      subject: "Password Reset - Entwined",
+      html: `
+        <div style="font-family: sans-serif; max-width: 500px; margin: auto;">
+          <h2>Reset your password</h2>
+          <p>Click the button below to reset your password. This link expires in <strong>15 minutes</strong>.</p>
+          <a href="${resetUrl}" style="
+            display: inline-block;
+            background: #6c63ff;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 16px 0;
+          ">Reset Password</a>
+          <p style="color: #888; font-size: 13px;">
+            If you did not request this, you can safely ignore this email.
+          </p>
+        </div>
+      `,
     });
 
     res.json({ message: "Reset link sent" });
-
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -243,7 +339,7 @@ const resetPassword = async (req, res) => {
 
     const user = await User.findOne({
       passwordResetToken: hashedToken,
-      passwordResetExpire: { $gt: Date.now() }
+      passwordResetExpire: { $gt: Date.now() },
     });
 
     if (!user)
@@ -255,11 +351,12 @@ const resetPassword = async (req, res) => {
     await user.save();
 
     res.json({ message: "Password reset successful" });
-
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
+/* ================= GOOGLE LOGIN ================= */
 
 const googleLogin = async (req, res) => {
   try {
@@ -280,18 +377,29 @@ const googleLogin = async (req, res) => {
         username: name,
         email,
         password: null,
-        isVerified: true
+        isVerified: true, // Google accounts skip email verification
       });
     }
 
-    const jwtToken = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    // Use the same access/refresh token pattern as regular login
+    const accessToken = createAccessToken(user);
+    const refreshToken = createRefreshToken(user);
 
-    res.json({ user, token: jwtToken });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false, // set to true in production
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
+    res.json({
+      accessToken,
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+      },
+    });
   } catch (err) {
     console.error("Google login error:", err);
     res.status(500).json({ message: "Google login failed" });
@@ -300,6 +408,7 @@ const googleLogin = async (req, res) => {
 
 /* ================= VERIFY TOKEN ================= */
 // Used by frontend to validate stored access token and fetch current user
+
 const verifyToken = async (req, res) => {
   try {
     const user = req.user;
@@ -315,22 +424,24 @@ const verifyToken = async (req, res) => {
         favoriteGenres: user.favoriteGenres || [],
         readingPersona: user.readingPersona || "",
         readingStats: user.readingStats || {},
-        createdAt: user.createdAt
-      }
+        createdAt: user.createdAt,
+      },
     });
   } catch (err) {
     res.status(500).json({ message: err.message || "Verification failed" });
   }
 };
+
 module.exports = {
   signup,
   login,
   verifyEmail,
+  resendVerification,
   forgotPassword,
   resetPassword,
   refreshTokenHandler,
   logout,
   logoutAll,
   googleLogin,
-  verifyToken
+  verifyToken,
 };
