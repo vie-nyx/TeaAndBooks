@@ -179,7 +179,7 @@ export default function PostCard({ post, onUpdated }) {
                 <p>No conversations available yet.</p>
               )}
               {!loadingConversations &&
-                conversations.map((conversation) => (
+                (conversations ?? []).map((conversation) => (
                   <button
                     type="button"
                     key={conversation._id}
