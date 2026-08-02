@@ -101,7 +101,7 @@ export default function PostCard({ post, onUpdated }) {
           {profileImage ? (
             <img src={profileImage} alt={`${username} profile`} />
           ) : (
-            username.charAt(0).toUpperCase()
+            username[0].toUpperCase()
           )}
         </div>
         <div className="post-username">@{username}</div>
