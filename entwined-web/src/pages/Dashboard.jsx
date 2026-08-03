@@ -292,3 +292,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+.catch(err => console.error("Promise.all failed:", err));

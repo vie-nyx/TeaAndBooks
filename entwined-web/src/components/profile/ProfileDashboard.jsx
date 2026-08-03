@@ -555,3 +555,4 @@ export default function ProfileDashboard({
     </div>
   );
 }
+.catch(err => console.error("Promise.all failed:", err));
